@@ -1,0 +1,130 @@
+<div class="game-container">
+  <!-- Game Start Countdown -->
+  <div *ngIf="showStartCountdown" class="countdown-overlay">
+    <div class="countdown-circle">
+      <div class="countdown-text" [class.go-text]="startCountdown <= 0">
+        {{ getCountdownText() }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading && !showStartCountdown" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Starting game...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    <p>{{ errorMessage }}</p>
+    <button (click)="router.navigate(['/create-room'])" class="back-button">
+      Back to Rooms
+    </button>
+  </div>
+
+  <!-- Game Interface -->
+  <div *ngIf="game && game.currentRoundData && !showStartCountdown && !isLoading" class="game-interface">
+    <!-- Game Header -->
+    <div class="game-header" *ngIf="game.status !== 'COMPLETED'">
+      <div class="players-info">
+        <div class="player host">
+          <div class="player-name">{{ game.hostName }}</div>
+          <div class="player-score">
+            <span class="score-number">{{ game.hostScore }}</span>
+          </div>
+        </div>
+        
+        <div class="vs-divider">VS</div>
+        
+        <div class="player guest">
+          <div class="player-name">{{ game.guestName }}</div>
+          <div class="player-score">
+            <span class="score-number">{{ game.guestScore }}</span>
+          </div>          
+        </div>
+      </div>
+      
+      <div class="round-info">
+        <span class="round-text">Round {{ game.currentRound }} / {{ game.totalRounds }}</span>
+      </div>
+    </div>
+
+    <!-- Round Timer (hidden when game is completed) -->
+    <div class="round-timer-container" *ngIf="game.status !== 'COMPLETED'">
+      <div class="round-timer" [class.timer-warning]="roundTimeRemaining <= 5">
+        <div class="timer-circle">
+          <div class="timer-text">{{ roundTimeRemaining }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flag Display -->
+    <div class="flag-container" *ngIf="game.currentRoundData && game.status === 'IN_PROGRESS'">
+      <div class="flag-wrapper">
+        <img 
+          [src]="getFlagImageSrc()" 
+          alt="Country Flag" 
+          class="flag-image"
+          *ngIf="getFlagImageSrc()"
+          (error)="onImageError($event)"
+          (load)="onImageLoad($event)"
+        />
+        <div *ngIf="!getFlagImageSrc()" class="flag-placeholder">
+          <span>🏳️</span>
+        </div>
+      </div>
+      
+      <div class="guess-section">
+        <div class="guess-input-container">
+          <input 
+            type="text" 
+            [(ngModel)]="userGuess" 
+            placeholder="Enter country name..."
+            class="guess-input"
+            [disabled]="isSubmittingGuess || roundTimeRemaining <= 0"
+            (keyup.enter)="submitGuess()"
+          />
+          <button 
+            (click)="submitGuess()" 
+            class="submit-guess-btn"
+            [disabled]="!userGuess.trim() || isSubmittingGuess || roundTimeRemaining <= 0"
+          >
+            <span *ngIf="!isSubmittingGuess">Submit</span>
+            <span *ngIf="isSubmittingGuess">...</span>
+          </button>
+        </div>
+        
+        <div *ngIf="guessMessage" class="guess-message" [class.correct]="isGuessCorrect === true" [class.incorrect]="isGuessCorrect === false">
+          {{ guessMessage }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Game End Screen -->
+    <div *ngIf="game.status === 'COMPLETED'" class="game-end-container">
+      <div class="game-end-content">
+        <h2 class="game-end-title">🎉 Game Completed! 🎉</h2>
+        <div class="winner-announcement">
+          {{ getWinnerMessage() }}
+        </div>
+        
+        <div class="final-scores">
+          <div class="final-score">
+            <span class="player-name">{{ game.hostName }}</span>
+            <span class="score">{{ game.hostScore }}</span>
+          </div>
+          <div class="final-score">
+            <span class="player-name">{{ game.guestName }}</span>
+            <span class="score">{{ game.guestScore }}</span>
+          </div>
+        </div>
+        
+        <div class="button-container">
+          <button (click)="router.navigate(['/create-room'])" class="nav-btn">
+            Home
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

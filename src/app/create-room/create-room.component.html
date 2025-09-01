@@ -1,0 +1,54 @@
+<div class="create-room-container">
+  <header class="page-header">
+    <h1>Create a New Game Room</h1>
+    <p>Start your FlagFinder adventure!</p>
+  </header>
+
+  <div class="content-wrapper">
+    <div class="form-section">
+      <div class="form-info">
+        <h3>Ready to Play?</h3>
+        <p>Click the button below to create a new game room. You'll be able to invite friends and start playing immediately!</p>
+      </div>
+
+      <form [formGroup]="createRoomForm" (ngSubmit)="onSubmit()" class="create-room-form">
+        <button type="submit" class="btn-create-room" [disabled]="isLoading">
+          <i class="fa fa-gamepad" *ngIf="!isLoading"></i>
+          <i class="fa fa-spinner fa-spin" *ngIf="isLoading"></i>
+          {{ isLoading ? 'Creating Room...' : 'Create Room' }}
+        </button>
+      </form>
+
+      <div class="error-message" *ngIf="errorMessage">
+        <i class="fa fa-exclamation-circle"></i>
+        {{ errorMessage }}
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h3>How It Works</h3>
+      <ol>
+        <li>Create a room with one click</li>
+        <li>Share the room ID with friends</li>
+        <li>Wait for them to join</li>
+        <li>Start the game when ready</li>
+        <li>Compete to identify flags!</li>
+      </ol>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn" (click)="goToBrowseRooms()">
+      <i class="fa fa-search"></i>
+      Browse Rooms
+    </button>
+    <button class="nav-btn" (click)="goToProfile()">
+      <i class="fa fa-user"></i>
+      Profile
+    </button>
+    <button class="nav-btn" (click)="logout()">
+      <i class="fa fa-sign-out-alt"></i>
+      Logout
+    </button>
+  </nav>
+</div>

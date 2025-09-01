@@ -1,0 +1,255 @@
+<div class="room-container">
+  <header class="page-header">
+    <h1>Game Room</h1>
+    <p>Get ready to play FlagFinder!</p>
+  </header>
+
+  <div class="content-wrapper" *ngIf="!isLoading && room">
+    <div class="players-section">
+      <!-- Host Side (Left) -->
+      <div class="player-card host-card">
+        <div class="player-header">
+          <div class="player-avatar">
+            <img *ngIf="getUserProfilePicture(room.hostUserName)" 
+                 [src]="getUserProfilePicture(room.hostUserName)" 
+                 [alt]="room.hostUserName + ' profile picture'"
+                 class="profile-pic">
+            <i class="fa fa-crown" *ngIf="!getUserProfilePicture(room.hostUserName)"></i>
+          </div>
+          <div class="player-info">
+            <h3 class="player-name">{{ room.hostUserName }}</h3>
+            <span class="player-role">Host</span>
+          </div>
+        </div>
+        
+        <div class="player-stats">
+          <div class="stat-item">
+            <i class="fa fa-trophy"></i>
+            <div class="stat-content">
+              <span class="stat-value">12</span>
+              <span class="stat-label">Games Won</span>
+            </div>
+          </div>
+          
+          <div class="stat-item">
+            <i class="fa fa-flag"></i>
+            <div class="stat-content">
+              <span class="stat-value">89%</span>
+              <span class="stat-label">Accuracy</span>
+            </div>
+          </div>
+          
+          <div class="stat-item">
+            <i class="fa fa-clock"></i>
+            <div class="stat-content">
+              <span class="stat-value">2.3s</span>
+              <span class="stat-label">Avg Time</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="player-status">
+          <div class="status-indicator ready">
+            <i class="fa fa-check-circle"></i>
+            <span>Ready to Play</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- VS Divider -->
+      <div class="vs-divider">
+        <div class="vs-circle">
+          <span>VS</span>
+        </div>
+        <div class="vs-line"></div>
+      </div>
+
+      <!-- Guest Side (Right) -->
+      <div class="player-card guest-card" *ngIf="room.guestUserName; else waitingGuest">
+        <div class="player-header">
+          <div class="player-avatar">
+            <img *ngIf="getUserProfilePicture(room.guestUserName)" 
+                 [src]="getUserProfilePicture(room.guestUserName)" 
+                 [alt]="room.guestUserName + ' profile picture'"
+                 class="profile-pic">
+            <i class="fa fa-user" *ngIf="!getUserProfilePicture(room.guestUserName)"></i>
+          </div>
+          <div class="player-info">
+            <h3 class="player-name">{{ room.guestUserName }}</h3>
+            <span class="player-role">Guest</span>
+          </div>
+        </div>
+        
+        <div class="player-stats">
+          <div class="stat-item">
+            <i class="fa fa-trophy"></i>
+            <div class="stat-content">
+              <span class="stat-value">8</span>
+              <span class="stat-label">Games Won</span>
+            </div>
+          </div>
+          
+          <div class="stat-item">
+            <i class="fa fa-flag"></i>
+            <div class="stat-content">
+              <span class="stat-value">76%</span>
+              <span class="stat-label">Accuracy</span>
+            </div>
+          </div>
+          
+          <div class="stat-item">
+            <i class="fa fa-clock"></i>
+            <div class="stat-content">
+              <span class="stat-value">3.1s</span>
+              <span class="stat-label">Avg Time</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="player-status">
+          <div class="status-indicator ready">
+            <i class="fa fa-check-circle"></i>
+            <span>Ready to Play</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Waiting for Guest Template -->
+      <ng-template #waitingGuest>
+        <div class="player-card guest-card waiting">
+          <div class="player-header">
+            <div class="player-avatar waiting">
+              <i class="fa fa-user-plus"></i>
+            </div>
+            <div class="player-info">
+              <h3 class="player-name">Waiting...</h3>
+              <span class="player-role">Guest</span>
+            </div>
+          </div>
+          
+          <div class="waiting-message">
+            <i class="fa fa-hourglass-half"></i>
+            <p>Waiting for a player to join</p>
+            <div class="pulse-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Friend Invitation Section -->
+    <div class="friend-invitation-section" *ngIf="isCurrentUserHost() && !room.guestUserName">
+      <h3>Invite a Friend</h3>
+      <p>Invite a friend to join your game by entering their game name</p>
+      
+      <div class="invitation-form" *ngIf="!showInviteForm">
+        <button class="btn-primary invite-btn" (click)="toggleInviteForm()">
+          <i class="fa fa-user-plus"></i>
+          Invite Friend
+        </button>
+      </div>
+      
+      <div class="invitation-form" *ngIf="showInviteForm">
+        <div class="form-group">
+          <label for="friendGameName">Friend's Game Name:</label>
+          <input 
+            type="text" 
+            id="friendGameName"
+            [(ngModel)]="friendGameName"
+            placeholder="Enter friend's game name"
+            class="form-input"
+            [disabled]="isInviting"
+          >
+        </div>
+        
+        <div class="form-actions">
+          <button 
+            class="btn-primary" 
+            (click)="inviteFriend()"
+            [disabled]="isInviting || !friendGameName.trim()"
+          >
+            <i class="fa fa-paper-plane" *ngIf="!isInviting"></i>
+            <i class="fa fa-spinner fa-spin" *ngIf="isInviting"></i>
+            {{ isInviting ? 'Sending...' : 'Send Invitation' }}
+          </button>
+          <button 
+            class="btn-secondary" 
+            (click)="toggleInviteForm()"
+            [disabled]="isInviting"
+          >
+            Cancel
+          </button>
+        </div>
+        
+        <div class="invite-message" *ngIf="inviteMessage">
+          <div class="message" [class]="inviteMessage.includes('error') ? 'error' : 'success'">
+            <i class="fa" [class]="inviteMessage.includes('error') ? 'fa-exclamation-circle' : 'fa-check-circle'"></i>
+            {{ inviteMessage }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start Game Section -->
+    <div class="start-game-section" *ngIf="room.guestUserName">
+      <h3>Ready to Start?</h3>
+      <p>Both players are ready. Either player can start the game!</p>
+      
+      <button class="btn-start-game" (click)="startGame()">
+        <i class="fa fa-play"></i>
+        Start Game
+      </button>
+    </div>
+
+    <!-- Keep the existing game info section unchanged -->
+    <div class="game-info-section">
+      <h3>How to Play:</h3>
+      <ol>
+        <li>Share the room ID with your friend</li>
+        <li>Wait for them to join</li>
+        <li>Start the game when ready</li>
+        <li>Identify flags as quickly as possible</li>
+        <li>Highest score wins!</li>
+      </ol>
+      
+      <div class="room-id-display">
+        <h4>Room ID to Share:</h4>
+        <div class="room-id-box">
+          <code>{{ room.id }}</code>
+          <button class="copy-btn" (click)="copyRoomId()">
+            <i class="fa fa-copy"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="spinner">
+      <div class="spinner-circle"></div>
+    </div>
+    <p>Loading room...</p>
+  </div>
+
+  <div class="error-container" *ngIf="errorMessage">
+    <div class="error-message">
+      <i class="fa fa-exclamation-circle"></i>
+      {{ errorMessage }}
+    </div>
+    <button class="btn-primary" (click)="goBack()">Go Back</button>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn" (click)="goBack()">
+      <i class="fa fa-arrow-left"></i>
+      Back to Create Room
+    </button>
+    <button class="nav-btn" (click)="logout()">
+      <i class="fa fa-sign-out-alt"></i>
+      Logout
+    </button>
+  </nav>
+</div>

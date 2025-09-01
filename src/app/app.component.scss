@@ -1,0 +1,122 @@
+.app-container {
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
+  position: relative;
+}
+
+.header {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 1rem 2rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+
+  h1 {
+    color: white;
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.flags-rope-background {
+  position: absolute;
+  bottom: -113px;
+  left: -2rem;
+  right: -2rem;
+  height: 120px;
+  background-image: url('/assets/images/flags-rope.png');
+  background-repeat: repeat-x;
+  background-size: auto 120px;
+  background-position: left top;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
+  margin: 0;
+  padding: 120px 0 0 0;
+  position: relative;
+  z-index: 20;
+}
+/* Invite modal styling */
+.invite-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+}
+
+.invite-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  width: 320px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+.invite-card h3 {
+  margin: 0 0 10px;
+}
+
+.invite-card p {
+  margin: 0 0 16px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: #fff;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+}
+
+/* Ensure routed views display normally */
+
+/* Global responsive adjustments */
+@media (max-width: 700px) {
+  .header {
+    padding: 1rem;
+    
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .flags-rope-background {
+    background-repeat: no-repeat;
+    background-size: 100% 120px;
+    background-position: center top;
+  }
+
+  .main-content {
+    padding: 120px 0 0 0;
+  }
+}
+  
