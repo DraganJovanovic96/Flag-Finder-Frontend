@@ -1,0 +1,22 @@
+<div class="app-container">
+  <header class="header">
+    <h1>Flag Finder</h1>
+    <div class="flags-rope-background"></div>
+  </header>
+  
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Invite Modal -->
+  <div class="invite-modal" *ngIf="pendingInvite as inv">
+    <div class="invite-card">
+      <h3>Game Invitation</h3>
+      <p><strong>{{ inv.initiatorUserName }}</strong> invited you to join a game.</p>
+      <div class="actions">
+        <button class="btn-primary" (click)="acceptInvite()">Accept</button>
+        <button class="btn-secondary" (click)="declineInvite()">Decline</button>
+      </div>
+    </div>
+  </div>
+</div>

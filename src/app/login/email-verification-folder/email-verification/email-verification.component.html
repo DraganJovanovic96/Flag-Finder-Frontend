@@ -1,0 +1,35 @@
+<div class="verification-container">
+  <div class="verification-card">
+    <div class="verification-header">
+      <h2>Email Verification</h2>
+      <p>Please wait while we verify your email address</p>
+    </div>
+
+    <div class="verification-content" *ngIf="verificationStatus === 'verifying'">
+      <div class="spinner">
+        <div class="spinner-circle"></div>
+      </div>
+      <p>Verifying your email address...</p>
+    </div>
+
+    <div class="verification-content" *ngIf="verificationStatus === 'success'">
+      <div class="success-icon">
+        <i class="fa fa-check-circle"></i>
+      </div>
+      <h3>Email Verified Successfully!</h3>
+      <p>Your email address has been verified. You will be redirected to the login page shortly.</p>
+    </div>
+
+    <div class="verification-content" *ngIf="verificationStatus === 'error'">
+      <div class="error-icon">
+        <i class="fa fa-exclamation-circle"></i>
+      </div>
+      <h3>Verification Failed</h3>
+      <p>{{ errorMessage || 'An error occurred during verification. Please try again.' }}</p>
+    </div>
+
+    <div class="verification-actions">
+      <button class="btn-primary" (click)="goToLogin()">Go to Login</button>
+    </div>
+  </div>
+</div>
