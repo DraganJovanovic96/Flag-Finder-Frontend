@@ -69,6 +69,9 @@ export class GameComponent implements OnInit, OnDestroy {
   // Subscriptions
   private gameStateInterval: Subscription | null = null;
   private subscriptions: Subscription[] = [];
+  
+  // Game rounds data for end screen
+  gameRounds: any[] = [];
 
   constructor(
     public router: Router,
@@ -447,6 +450,11 @@ export class GameComponent implements OnInit, OnDestroy {
       this.gameStateInterval = null;
     }
     
+    // Fetch game rounds data for detailed end screen
+    if (this.game?.id) {
+      this.fetchGameRounds();
+    }
+    
     // Force change detection to ensure UI updates
     this.cdr.detectChanges();
   }
@@ -490,9 +498,9 @@ export class GameComponent implements OnInit, OnDestroy {
     if (!this.game || this.game.status !== 'COMPLETED') return '';
     
     if (this.game.hostScore > this.game.guestScore) {
-      return `${this.game.hostName} wins!`;
+      return `${this.game.hostName.toUpperCase()} WINS!`;
     } else if (this.game.guestScore > this.game.hostScore) {
-      return `${this.game.guestName} wins!`;
+      return `${this.game.guestName.toUpperCase()} WINS!`;
     } else {
       return "It's a tie!";
     }
@@ -601,5 +609,29 @@ export class GameComponent implements OnInit, OnDestroy {
         this.hideSuggestions();
         break;
     }
+  }
+
+  fetchGameRounds(): void {
+    if (!this.game?.id) return;
+
+    const headers = new HttpHeaders()
+      .set('Content-Type', 'application/json')
+      .set('Accept', '*/*');
+
+    this.http.get<any[]>(`${BASIC_URL}games/${this.game.id}/rounds`, { headers })
+      .subscribe({
+        next: (rounds) => {
+          console.log('Game rounds fetched:', rounds);
+          this.gameRounds = rounds;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error fetching game rounds:', error);
+        }
+      });
+  }
+
+  hasGuessForPlayer(round: any, playerName: string): boolean {
+    return round.guesses && round.guesses.some((guess: any) => guess.userGameName === playerName);
   }
 }

@@ -450,7 +450,7 @@
   padding: 40px;
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  max-width: 500px;
+  max-width: 800px;
   width: 100%;
 }
 
@@ -631,5 +631,232 @@
 
   .button-container {
     margin-top: 20px;
+  }
+}
+
+/* Rounds Summary Table */
+.rounds-summary {
+  margin: 30px 0;
+  text-align: left;
+}
+
+.rounds-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #FFD700;
+}
+
+.rounds-table {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.rounds-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+}
+
+.round-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background-color 0.2s ease;
+  align-items: center;
+}
+
+.round-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.round-row:last-child {
+  border-bottom: none;
+}
+
+.flag-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.round-flag {
+  width: 60px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.guess-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.guess-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.status-indicator {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.status-indicator.correct {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
+  border: 1px solid #4CAF50;
+}
+
+.status-indicator.incorrect {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+  border: 1px solid #f44336;
+}
+
+/* Final Score Cards */
+.final-scores-cards {
+  display: flex;
+  gap: 20px;
+  margin: 30px 0;
+  justify-content: center;
+}
+
+.score-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 25px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.score-card.winner-card {
+  border-color: #FFD700;
+  background: rgba(255, 215, 0, 0.1);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+  transform: scale(1.05);
+}
+
+.player-avatar {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.winner-card .player-avatar {
+  background: rgba(255, 215, 0, 0.3);
+  color: #FFD700;
+}
+
+.player-info {
+  text-align: center;
+}
+
+.player-info .player-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.player-info .player-score {
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 5px;
+}
+
+.crown {
+  position: absolute;
+  top: -15px;
+  right: -10px;
+  font-size: 1.5rem;
+  color: #FFD700;
+  animation: crown-glow 2s ease-in-out infinite;
+}
+
+@keyframes crown-glow {
+  0%, 100% { 
+    transform: scale(1);
+    filter: drop-shadow(0 0 5px #FFD700);
+  }
+  50% { 
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 15px #FFD700);
+  }
+}
+
+/* Mobile Responsive for new components */
+@media (max-width: 700px) {
+  .rounds-table {
+    font-size: 0.9rem;
+  }
+  
+  .rounds-header,
+  .round-row {
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 10px;
+  }
+  
+  .round-flag {
+    width: 40px;
+    height: 27px;
+  }
+  
+  .status-indicator {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+  
+  .final-scores-cards {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .score-card {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .score-card.winner-card {
+    transform: none;
   }
 }
