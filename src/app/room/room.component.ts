@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnDestroy, NgZone, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy, NgZone, ChangeDetectorRef, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -31,6 +31,7 @@ interface Room {
 })
 export class RoomComponent implements OnInit, OnDestroy {
   @Input() roomData: Room | null = null;
+  @ViewChild('friendGameNameInput') friendGameNameInput!: ElementRef<HTMLInputElement>;
   
   room: Room | null = null;
   roomId = '';
@@ -320,6 +321,14 @@ export class RoomComponent implements OnInit, OnDestroy {
     if (!this.showInviteForm) {
       this.friendGameName = '';
       this.inviteMessage = '';
+    } else {
+      // Auto-focus and select text when form is shown
+      setTimeout(() => {
+        if (this.friendGameNameInput) {
+          this.friendGameNameInput.nativeElement.focus();
+          this.friendGameNameInput.nativeElement.select();
+        }
+      }, 0);
     }
   }
 

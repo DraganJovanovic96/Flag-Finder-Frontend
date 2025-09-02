@@ -158,10 +158,12 @@
           <input 
             type="text" 
             id="friendGameName"
+            #friendGameNameInput
             [(ngModel)]="friendGameName"
             placeholder="Enter friend's game name"
             class="form-input"
             [disabled]="isInviting"
+            (keyup.enter)="inviteFriend()"
           >
         </div>
         
