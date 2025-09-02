@@ -118,7 +118,7 @@
       <ng-template #waitingGuest>
         <div class="player-card guest-card waiting">
           <div class="player-header">
-            <div class="player-avatar waiting">
+            <div class="player-avatar waiting clickable" (click)="toggleInviteForm()">
               <i class="fa fa-user-plus"></i>
             </div>
             <div class="player-info">

@@ -72,10 +72,11 @@ export class CreateRoomComponent implements OnInit {
           console.log('Room created successfully:', response);
           this.isLoading = false;
           
-          // Navigate to room page with host flag - creator is automatically host
-          this.router.navigate(['/room', response.id], { 
-            queryParams: { isHost: 'true' } 
-          });
+          // Store host status in localStorage for this room
+          localStorage.setItem(`room_${response.id}_isHost`, 'true');
+          
+          // Navigate to room page - creator is automatically host
+          this.router.navigate(['/room', response.id]);
         },
         error: (error) => {
           console.error('Error creating room:', error);

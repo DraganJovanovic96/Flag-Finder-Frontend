@@ -50,8 +50,7 @@
   padding: 2rem;
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 350px;
+  width: 350px;
   min-height: 280px;
   display: flex;
   flex-direction: column;
@@ -110,6 +109,16 @@
 
   &.waiting {
     animation: pulse 2s infinite;
+  }
+
+  &.clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
   }
 
   .profile-pic {
@@ -265,8 +274,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 1rem 0;
+  justify-content: center;
+  margin: 0;
   position: relative;
+  // height: 100%;
 }
 
 .vs-circle {
@@ -286,12 +297,12 @@
 
 .vs-line {
   position: absolute;
-  top: 30px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   width: 100px;
-  height: 2px;
-  background: linear-gradient(to bottom, transparent, #e74c3c, transparent);
+  height: 3px;
+  background: linear-gradient(to right, transparent, #e74c3c, transparent);
 }
 
 .game-info-section {
@@ -709,6 +720,7 @@
   .players-section {
     flex-direction: column;
     gap: 1.5rem;
+    align-items: center;
   }
 
   .player-card {

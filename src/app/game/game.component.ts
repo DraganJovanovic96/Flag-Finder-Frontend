@@ -57,6 +57,11 @@ export class GameComponent implements OnInit, OnDestroy {
   isSubmittingGuess = false;
   isGuessCorrect: boolean | null = null;
   
+  // Autocomplete
+  countrySuggestions: any[] = [];
+  showSuggestions = false;
+  selectedSuggestionIndex = -1;
+  
   // Cache flag URL to prevent excessive calls
   private cachedFlagUrl: string = '';
   private lastCountryId: string = '';
@@ -490,6 +495,111 @@ export class GameComponent implements OnInit, OnDestroy {
       return `${this.game.guestName} wins!`;
     } else {
       return "It's a tie!";
+    }
+  }
+
+  onGuessInput(): void {
+    const query = this.userGuess.trim();
+    console.log('Frontend: onGuessInput called with:', query, 'length:', query.length);
+    
+    if (query.length === 0) {
+      console.log('Frontend: Empty query, hiding suggestions');
+      this.hideSuggestions();
+      return;
+    }
+    
+    if (query.length >= 2) {
+      console.log('Frontend: Query length >= 2, searching countries');
+      this.searchCountries(query);
+    } else {
+      console.log('Frontend: Query length < 2, hiding suggestions');
+      this.hideSuggestions();
+    }
+  }
+
+  searchCountries(prefix: string): void {
+    console.log('Frontend: Searching countries with prefix:', prefix);
+    
+    const headers = new HttpHeaders()
+      .set('Content-Type', 'application/json')
+      .set('Accept', '*/*')
+      .set('Authorization', `Bearer ${localStorage.getItem('token')}`);
+
+    const url = `${BASIC_URL}countries/search?prefix=${encodeURIComponent(prefix)}`;
+    console.log('Frontend: Making request to:', url);
+
+    this.http.get<any[]>(url, { headers })
+      .subscribe({
+        next: (countries) => {
+          console.log('Frontend: Received countries:', countries);
+          console.log('Frontend: Countries length:', countries.length);
+          this.countrySuggestions = countries;
+          this.showSuggestions = countries.length > 0 && countries.length <= 5;
+          this.selectedSuggestionIndex = -1;
+          console.log('Frontend: showSuggestions set to:', this.showSuggestions);
+          console.log('Frontend: countrySuggestions:', this.countrySuggestions);
+          this.cdr.detectChanges();
+          
+          // Debug: Check if dropdown element exists in DOM
+          setTimeout(() => {
+            const dropdown = document.querySelector('.suggestions-dropdown');
+            console.log('Frontend: Dropdown element in DOM:', !!dropdown);
+            if (dropdown) {
+              console.log('Frontend: Dropdown styles:', window.getComputedStyle(dropdown).display);
+            }
+          }, 100);
+        },
+        error: (error) => {
+          console.error('Frontend: Error searching countries:', error);
+          this.hideSuggestions();
+        }
+      });
+  }
+
+  selectSuggestion(country: any): void {
+    this.userGuess = country.nameOfCounty;
+    this.hideSuggestions();
+  }
+
+  hideSuggestions(): void {
+    this.showSuggestions = false;
+    this.countrySuggestions = [];
+    this.selectedSuggestionIndex = -1;
+  }
+
+  onFocusOut(): void {
+    // Delay hiding suggestions to allow click events on suggestions to fire
+    setTimeout(() => {
+      this.hideSuggestions();
+    }, 150);
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    if (!this.showSuggestions || this.countrySuggestions.length === 0) {
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.selectedSuggestionIndex = Math.min(
+          this.selectedSuggestionIndex + 1,
+          this.countrySuggestions.length - 1
+        );
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.selectedSuggestionIndex = Math.max(this.selectedSuggestionIndex - 1, -1);
+        break;
+      case 'Enter':
+        if (this.selectedSuggestionIndex >= 0) {
+          event.preventDefault();
+          this.selectSuggestion(this.countrySuggestions[this.selectedSuggestionIndex]);
+        }
+        break;
+      case 'Escape':
+        this.hideSuggestions();
+        break;
     }
   }
 }

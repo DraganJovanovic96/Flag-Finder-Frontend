@@ -76,14 +76,29 @@
       
       <div class="guess-section">
         <div class="guess-input-container">
-          <input 
-            type="text" 
-            [(ngModel)]="userGuess" 
-            placeholder="Enter country name..."
-            class="guess-input"
-            [disabled]="isSubmittingGuess || roundTimeRemaining <= 0"
-            (keyup.enter)="submitGuess()"
-          />
+          <div class="autocomplete-wrapper">
+            <input 
+              type="text" 
+              [(ngModel)]="userGuess" 
+              placeholder="Enter country name..."
+              class="guess-input"
+              [disabled]="isSubmittingGuess || roundTimeRemaining <= 0"
+              (input)="onGuessInput()"
+              (keydown)="onKeyDown($event)"
+              (keyup.enter)="submitGuess()"
+              (focusout)="onFocusOut()"
+            />
+            <div *ngIf="showSuggestions" class="suggestions-dropdown">
+              <div 
+                *ngFor="let country of countrySuggestions; let i = index"
+                class="suggestion-item"
+                [class.selected]="i === selectedSuggestionIndex"
+                (mousedown)="selectSuggestion(country)"
+              >
+                {{ country.nameOfCounty }}
+              </div>
+            </div>
+          </div>
           <button 
             (click)="submitGuess()" 
             class="submit-guess-btn"
@@ -121,6 +136,7 @@
         
         <div class="button-container">
           <button (click)="router.navigate(['/create-room'])" class="nav-btn">
+            <i class="fa fa-home"></i>
             Home
           </button>
         </div>

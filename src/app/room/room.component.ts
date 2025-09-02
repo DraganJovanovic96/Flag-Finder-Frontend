@@ -126,10 +126,8 @@ export class RoomComponent implements OnInit, OnDestroy {
       this.roomId = params['id'];
       // console.log('[RoomComponent] Route param roomId set to:', this.roomId);
       if (this.roomId) {
-        // Check query params to see if user created this room
-        this.route.queryParams.subscribe(queryParams => {
-          this.isHost = queryParams['isHost'] === 'true';
-        });
+        // Check if user is host from localStorage
+        this.isHost = localStorage.getItem(`room_${this.roomId}_isHost`) === 'true';
         this.loadRoom();
         // Register room-specific WS handler AFTER roomId is known
         const handler = (roomUpdate: any) => {
