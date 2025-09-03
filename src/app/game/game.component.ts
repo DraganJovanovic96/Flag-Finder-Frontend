@@ -43,34 +43,27 @@ export class GameComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage: string | null = null;
   
-  // Game start countdown
   showStartCountdown = false;
   startCountdown = 5;
   
-  // Round timer
   roundTimeRemaining = 0;
   private roundTimerInterval: any = null;
   
-  // User input
   userGuess = '';
   guessMessage = '';
   isSubmittingGuess = false;
   isGuessCorrect: boolean | null = null;
   
-  // Autocomplete
   countrySuggestions: any[] = [];
   showSuggestions = false;
   selectedSuggestionIndex = -1;
   
-  // Cache flag URL to prevent excessive calls
   private cachedFlagUrl: string = '';
   private lastCountryId: string = '';
   
-  // Subscriptions
   private gameStateInterval: Subscription | null = null;
   private subscriptions: Subscription[] = [];
   
-  // Game rounds data for end screen
   gameRounds: any[] = [];
 
   constructor(
@@ -89,51 +82,39 @@ export class GameComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Ensure WebSocket connection is established
     this.wsService.connect();
     
-    // Subscribe to round started notifications
     this.subscriptions.push(
       this.wsService.roundStarted$.subscribe({
         next: (gameData: any) => {
-          console.log('[GameComponent] Round started notification received:', gameData);
           this.ngZone.run(() => {
             if (gameData && this.game && gameData.id === this.game.id) {
-              // Update game state immediately with new round data
-              console.log('[GameComponent] WebSocket round start - updating from round', this.game.currentRound, 'to', gameData.currentRound);
               this.game = gameData;
               this.roundTimeRemaining = gameData.currentRoundData?.timeRemaining || 0;
               this.startRoundTimer();
               this.userGuess = '';
               this.guessMessage = '';
               this.cdr.detectChanges();
-              console.log('[GameComponent] Game state updated for new round:', gameData.currentRound);
             }
           });
         },
         error: (error) => {
-          console.error('[GameComponent] Error in round-started subscription:', error);
         }
       })
     );
 
-    // Subscribe to game ended notifications
     this.subscriptions.push(
       this.wsService.gameEnded$.subscribe({
         next: (gameData: any) => {
-          console.log('[GameComponent] Game ended notification received:', gameData);
           this.ngZone.run(() => {
             if (gameData && this.game && gameData.id === this.game.id) {
-              // Update game state with final results
               this.game = gameData;
               this.handleGameEnd();
               this.cdr.detectChanges();
-              console.log('[GameComponent] Game ended, showing results');
             }
           });
         },
         error: (error) => {
-          console.error('[GameComponent] Error in game-ended subscription:', error);
         }
       })
     );
@@ -162,7 +143,6 @@ export class GameComponent implements OnInit, OnDestroy {
   initializeGame(): void {
     this.isLoading = true;
     
-    // First, try to get existing game for this room
     this.getExistingGame();
   }
 
@@ -174,7 +154,6 @@ export class GameComponent implements OnInit, OnDestroy {
     this.http.get<Game>(`${BASIC_URL}games/room/${this.roomId}`, { headers })
       .subscribe({
         next: (response: Game) => {
-          console.log('Existing game found:', response);
           this.game = response;
           this.roundTimeRemaining = response.currentRoundData?.timeRemaining || 0;
           this.isLoading = false;
@@ -183,11 +162,8 @@ export class GameComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           if (error.status === 404) {
-            // No existing game, try to start a new one
-            console.log('No existing game found, starting new game');
             this.startGame();
           } else {
-            console.error('Error getting existing game:', error);
             this.errorMessage = error.error?.message || 'Failed to load game';
             this.isLoading = false;
           }
@@ -206,7 +182,6 @@ export class GameComponent implements OnInit, OnDestroy {
 
     this.http.post<Game>(`${BASIC_URL}games/start`, startGameRequest, { headers })
       .subscribe((response: Game) => {
-        console.log('Game started:', response);
         this.game = response;
         this.roundTimeRemaining = response.currentRoundData?.timeRemaining || 0;
         this.isLoading = false;
@@ -214,14 +189,12 @@ export class GameComponent implements OnInit, OnDestroy {
         this.startRoundTimer();
       },
       error => {
-        console.error('Error starting game:', error);
         this.errorMessage = error.error?.message || 'Failed to start game';
         this.isLoading = false;
       });
   }
 
   startGameStatePolling(): void {
-    // Poll game state every 500ms for real-time updates
     this.gameStateInterval = interval(500).subscribe(() => {
       if (this.game) {
         this.fetchGameState();
@@ -241,28 +214,22 @@ export class GameComponent implements OnInit, OnDestroy {
         const oldRound = this.game?.currentRound;
         this.game = response;
         
-        // If round changed, restart timer
         if (oldRound !== response.currentRound) {
-          console.log('Round changed from', oldRound, 'to', response.currentRound);
           this.roundTimeRemaining = response.currentRoundData?.timeRemaining || 0;
           this.startRoundTimer();
           this.userGuess = '';
           this.guessMessage = '';
         }
         
-        // Check if game ended
         if (response.status === 'COMPLETED') {
-          console.log('Game completed detected via polling, calling handleGameEnd');
           this.handleGameEnd();
         }
       },
       error => {
-        console.error('Error fetching game state:', error);
       });
   }
 
   startRoundTimer(): void {
-    // Clear any existing timer first
     if (this.roundTimerInterval) {
       clearInterval(this.roundTimerInterval);
       this.roundTimerInterval = null;
@@ -271,7 +238,6 @@ export class GameComponent implements OnInit, OnDestroy {
     if (!this.game?.currentRoundData?.roundActive) return;
     
     this.roundTimeRemaining = this.game.currentRoundData.timeRemaining;
-    console.log('Starting round timer with', this.roundTimeRemaining, 'seconds for round', this.game.currentRound);
     
     this.roundTimerInterval = setInterval(() => {
       this.roundTimeRemaining--;
@@ -301,41 +267,31 @@ export class GameComponent implements OnInit, OnDestroy {
 
     this.http.post<any>(`${BASIC_URL}games/guess`, guessRequest, { headers })
       .subscribe((response: any) => {
-        console.log('Guess submitted:', response);
         const prevGame = this.game;
         this.game = response.game;
         this.guessMessage = response.message;
         this.isSubmittingGuess = false;
         
-        // Apply correct/incorrect styling and trigger score animation
         this.isGuessCorrect = response.correct;
         if (response.correct) {
-          console.log('[Animation] Correct guess, scheduling trigger for +', response.pointsAwarded);
-          // Give time for WS/poll-driven DOM re-render between rounds
           setTimeout(() => {
             if ('requestAnimationFrame' in window) {
               requestAnimationFrame(() => {
-                // Determine which side scored based on score delta
                 let isHost = true;
                 if (prevGame) {
                   const hostIncreased = response.game.hostScore > prevGame.hostScore;
                   const guestIncreased = response.game.guestScore > prevGame.guestScore;
-                  // Prefer explicit deltas; if both changed (edge), default to host
                   if (hostIncreased && !guestIncreased) {
                     isHost = true;
                   } else if (!hostIncreased && guestIncreased) {
                     isHost = false;
                   } else if (!hostIncreased && !guestIncreased) {
-                    // No change detected; fall back using names if available
                     isHost = true;
                   }
                 }
-                console.log('[Animation] Calling triggerScoreAnimation; isHost =', isHost);
                 this.triggerScoreAnimation(response.pointsAwarded, isHost);
               });
             } else {
-              console.log('[Animation] rAF not available, calling triggerScoreAnimation directly');
-              // Fallback without prevGame; default host
               this.triggerScoreAnimation(response.pointsAwarded, true);
             }
           }, 150);
@@ -347,7 +303,6 @@ export class GameComponent implements OnInit, OnDestroy {
         }, 3000);
       },
       error => {
-        console.error('Error submitting guess:', error);
         this.guessMessage = error.error?.message || 'Failed to submit guess';
         this.isSubmittingGuess = false;
         
@@ -360,37 +315,27 @@ export class GameComponent implements OnInit, OnDestroy {
   triggerScoreAnimation(points: number, isHost: boolean, attempt: number = 0): void {
     if (!this.game) return;
     try {
-      console.log('Triggering score animation. isHost =', isHost);
-      
-      // Use a more specific approach - query all score elements and find the right one
       const allScoreElements = document.querySelectorAll('.player-score');
-      console.log(`[Animation] Attempt ${attempt} - Found score elements:`, allScoreElements.length);
       
       let scoreElement: HTMLElement | null = null;
       
       if (isHost) {
-        scoreElement = allScoreElements[0] as HTMLElement; // First player is host
+        scoreElement = allScoreElements[0] as HTMLElement;
       } else {
-        scoreElement = allScoreElements[1] as HTMLElement; // Second player is guest
+        scoreElement = allScoreElements[1] as HTMLElement;
       }
-      console.log('[Animation] Selected score element exists:', !!scoreElement, 'isConnected:', scoreElement?.isConnected);
-      
-      // If not found or detached due to re-render, retry a few times
       if (!scoreElement || !scoreElement.isConnected) {
         if (attempt < 5) {
           return setTimeout(() => this.triggerScoreAnimation(points, isHost, attempt + 1), 150) as unknown as void;
         } else {
-          console.error('[Animation] Could not find attached score element after retries');
           return;
         }
       }
 
       if (scoreElement) {
-        // Create animation element
         const animationElement = document.createElement('div');
         animationElement.textContent = `+${points}`;
         
-        // Set styles for golden text with black outline
         animationElement.style.position = 'absolute';
         animationElement.style.top = '-15px';
         animationElement.style.right = '-30px';
@@ -404,42 +349,29 @@ export class GameComponent implements OnInit, OnDestroy {
         animationElement.style.transform = 'translateY(0) scale(1)';
         animationElement.style.transition = 'all 2s ease-out';
         
-        // Append to the score element
         scoreElement.style.position = 'relative';
         scoreElement.appendChild(animationElement);
         
-        // Apply WebKit styles only to the animation element, not the score container
-        animationElement.style.webkitTextStroke = "2px #000";   // black outline
+        animationElement.style.webkitTextStroke = "2px #000";
         animationElement.style.webkitTextFillColor = "#FFD700";
         
-        console.log('[Animation] Element created and appended, starting JS animation');
-        
-        // Start animation with JavaScript
         setTimeout(() => {
           animationElement.style.transform = 'translateY(-60px) scale(0.8)';
           animationElement.style.opacity = '0';
         }, 50);
         
-        // Clean up after animation ends
         setTimeout(() => {
           if (animationElement.parentNode) {
             animationElement.remove();
-            console.log('Animation element removed');
           }
         }, 2100);
       } else {
-        console.error('Could not find score element for animation');
       }
     } catch (error) {
-      console.error('Error triggering score animation:', error);
     }
   }
 
   handleGameEnd(): void {
-    console.log('handleGameEnd called, game status:', this.game?.status);
-    console.log('Current game object:', this.game);
-    
-    // Clear round timer when game ends
     if (this.roundTimerInterval) {
       clearInterval(this.roundTimerInterval);
       this.roundTimerInterval = null;
@@ -450,12 +382,10 @@ export class GameComponent implements OnInit, OnDestroy {
       this.gameStateInterval = null;
     }
     
-    // Fetch game rounds data for detailed end screen
     if (this.game?.id) {
       this.fetchGameRounds();
     }
     
-    // Force change detection to ensure UI updates
     this.cdr.detectChanges();
   }
 
@@ -468,11 +398,9 @@ export class GameComponent implements OnInit, OnDestroy {
       return '';
     }
     
-    // Only regenerate URL if country changed
     if (currentCountryId !== this.lastCountryId) {
       this.cachedFlagUrl = `${BASIC_URL}countries/${currentCountryId}/flag`;
       this.lastCountryId = currentCountryId;
-      console.log('Flag URL (new):', this.cachedFlagUrl);
     }
     
     return this.cachedFlagUrl;
@@ -486,12 +414,9 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   onImageError(event: any): void {
-    console.error('Image failed to load:', event);
-    console.log('Failed URL:', event.target.src);
   }
 
   onImageLoad(event: any): void {
-    console.log('Image loaded successfully:', event.target.src);
   }
 
   getWinnerMessage(): string {
@@ -508,25 +433,20 @@ export class GameComponent implements OnInit, OnDestroy {
 
   onGuessInput(): void {
     const query = this.userGuess.trim();
-    console.log('Frontend: onGuessInput called with:', query, 'length:', query.length);
     
     if (query.length === 0) {
-      console.log('Frontend: Empty query, hiding suggestions');
       this.hideSuggestions();
       return;
     }
     
     if (query.length >= 2) {
-      console.log('Frontend: Query length >= 2, searching countries');
       this.searchCountries(query);
     } else {
-      console.log('Frontend: Query length < 2, hiding suggestions');
       this.hideSuggestions();
     }
   }
 
   searchCountries(prefix: string): void {
-    console.log('Frontend: Searching countries with prefix:', prefix);
     
     const headers = new HttpHeaders()
       .set('Content-Type', 'application/json')
@@ -534,31 +454,17 @@ export class GameComponent implements OnInit, OnDestroy {
       .set('Authorization', `Bearer ${localStorage.getItem('token')}`);
 
     const url = `${BASIC_URL}countries/search?prefix=${encodeURIComponent(prefix)}`;
-    console.log('Frontend: Making request to:', url);
 
     this.http.get<any[]>(url, { headers })
       .subscribe({
         next: (countries) => {
-          console.log('Frontend: Received countries:', countries);
-          console.log('Frontend: Countries length:', countries.length);
           this.countrySuggestions = countries;
           this.showSuggestions = countries.length > 0 && countries.length <= 5;
           this.selectedSuggestionIndex = -1;
-          console.log('Frontend: showSuggestions set to:', this.showSuggestions);
-          console.log('Frontend: countrySuggestions:', this.countrySuggestions);
           this.cdr.detectChanges();
           
-          // Debug: Check if dropdown element exists in DOM
-          setTimeout(() => {
-            const dropdown = document.querySelector('.suggestions-dropdown');
-            console.log('Frontend: Dropdown element in DOM:', !!dropdown);
-            if (dropdown) {
-              console.log('Frontend: Dropdown styles:', window.getComputedStyle(dropdown).display);
-            }
-          }, 100);
         },
         error: (error) => {
-          console.error('Frontend: Error searching countries:', error);
           this.hideSuggestions();
         }
       });
@@ -576,7 +482,6 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   onFocusOut(): void {
-    // Delay hiding suggestions to allow click events on suggestions to fire
     setTimeout(() => {
       this.hideSuggestions();
     }, 150);
@@ -621,12 +526,10 @@ export class GameComponent implements OnInit, OnDestroy {
     this.http.get<any[]>(`${BASIC_URL}games/${this.game.id}/rounds`, { headers })
       .subscribe({
         next: (rounds) => {
-          console.log('Game rounds fetched:', rounds);
           this.gameRounds = rounds;
           this.cdr.detectChanges();
         },
         error: (error) => {
-          console.error('Error fetching game rounds:', error);
         }
       });
   }

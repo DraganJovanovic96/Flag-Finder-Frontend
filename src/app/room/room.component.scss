@@ -279,7 +279,6 @@
   justify-content: center;
   margin: 0;
   position: relative;
-  // height: 100%;
 }
 
 .vs-circle {
@@ -495,7 +494,6 @@
   }
 }
 
-/* Friend Invitation Section */
 .friend-invitation-section {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: 20px;
@@ -580,7 +578,6 @@
   align-items: center;
 }
 
-/* Common button styles */
 .btn-primary, .btn-secondary {
   padding: 12px 24px;
   border-radius: 10px;
@@ -656,7 +653,6 @@
   font-size: 16px;
 }
 
-/* Start Game Section */
 .start-game-section {
   background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
   border-radius: 20px;
@@ -707,7 +703,6 @@
   font-size: 18px;
 }
 
-/* Continent Selection Styles - card style */
 .continent-selection-section {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: 20px;
@@ -894,7 +889,6 @@
   }
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .content-wrapper {
     grid-template-columns: 1fr;

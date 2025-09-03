@@ -35,14 +35,12 @@ export class LoginComponent implements OnInit {
   }
 
   private setupFormListeners(): void {
-    // Listen for changes in email field
     this.loginForm.get('email')?.valueChanges.subscribe(() => {
       if (this.errorMessage) {
         this.errorMessage = null;
       }
     });
 
-    // Listen for changes in password field
     this.loginForm.get('password')?.valueChanges.subscribe(() => {
       if (this.errorMessage) {
         this.errorMessage = null;
@@ -60,7 +58,6 @@ export class LoginComponent implements OnInit {
 
       this.authService.login(username, password).subscribe({
         next: (res: any) => {
-          // Login successful - user will be redirected by the auth service
           this.wsService.connect();
           this.isLoading = false;
         },
