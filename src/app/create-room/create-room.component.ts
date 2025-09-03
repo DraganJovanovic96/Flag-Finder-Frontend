@@ -42,7 +42,6 @@ export class CreateRoomComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Check if user is authenticated
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/login']);
       return;
@@ -50,8 +49,6 @@ export class CreateRoomComponent implements OnInit {
   }
 
   onSubmit(): void {
-    console.log('Current token:', this.authService.isAuthenticated() ? 'Present' : 'Not present');
-    console.log('Checking authentication, token present:', this.authService.getToken() ? true : false);
     
     if (!this.authService.isAuthenticated()) {
       console.error('User not authenticated');
@@ -62,20 +59,15 @@ export class CreateRoomComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = null;
 
-    console.log('Making API call to:', `${BASIC_URL}rooms/create`);
-    // Removed spurious headers GET that caused a 200 parsing error in console
 
-    // Auth interceptor will add the Authorization header
     this.http.post<CreateRoomResponse>(`${BASIC_URL}rooms/create`, {})
       .subscribe({
         next: (response) => {
-          console.log('Room created successfully:', response);
           this.isLoading = false;
           
-          // Navigate to room page with host flag - creator is automatically host
-          this.router.navigate(['/room', response.id], { 
-            queryParams: { isHost: 'true' } 
-          });
+          localStorage.setItem(`room_${response.id}_isHost`, 'true');
+          
+          this.router.navigate(['/room', response.id]);
         },
         error: (error) => {
           console.error('Error creating room:', error);
@@ -98,13 +90,9 @@ export class CreateRoomComponent implements OnInit {
   }
 
   goToBrowseRooms(): void {
-    // TODO: Implement browse rooms functionality
-    console.log('Browse rooms functionality to be implemented');
   }
 
   goToProfile(): void {
-    // TODO: Implement profile functionality
-    console.log('Profile functionality to be implemented');
   }
 
   logout(): void {

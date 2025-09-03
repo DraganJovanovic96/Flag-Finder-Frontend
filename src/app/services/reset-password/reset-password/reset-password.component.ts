@@ -24,7 +24,6 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Add custom validator for password confirmation
     this.resetForm.get('confirmPassword')?.setValidators([
       Validators.required,
       this.passwordMatchValidator.bind(this)
@@ -43,7 +42,6 @@ export class ResetPasswordComponent implements OnInit {
 
   onSubmit(): void {
     if (this.resetForm.valid) {
-      // Here you would typically call your API to reset the password
       this.successMessage = 'Password reset successfully!';
       setTimeout(() => {
         this.router.navigate(['/login']);

@@ -23,7 +23,6 @@ export class SendForgottenPasswordEmail {
 
   onSubmit(): void {
     if (this.emailForm.valid) {
-      // Here you would typically call your API to send reset email
       this.successMessage = 'If an account with that email exists, a password reset link has been sent.';
       setTimeout(() => {
         this.router.navigate(['/login']);

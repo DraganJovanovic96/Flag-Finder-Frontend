@@ -6,7 +6,6 @@
 
   <div class="content-wrapper" *ngIf="!isLoading && room">
     <div class="players-section">
-      <!-- Host Side (Left) -->
       <div class="player-card host-card">
         <div class="player-header">
           <div class="player-avatar">
@@ -26,7 +25,7 @@
           <div class="stat-item">
             <i class="fa fa-trophy"></i>
             <div class="stat-content">
-              <span class="stat-value">12</span>
+              <span class="stat-value">{{ getDisplayedGamesWon(hostUserInfo) }}</span>
               <span class="stat-label">Games Won</span>
             </div>
           </div>
@@ -34,7 +33,7 @@
           <div class="stat-item">
             <i class="fa fa-flag"></i>
             <div class="stat-content">
-              <span class="stat-value">89%</span>
+              <span class="stat-value">{{ getDisplayedAccuracy(hostUserInfo) }}</span>
               <span class="stat-label">Accuracy</span>
             </div>
           </div>
@@ -56,7 +55,6 @@
         </div>
       </div>
 
-      <!-- VS Divider -->
       <div class="vs-divider">
         <div class="vs-circle">
           <span>VS</span>
@@ -64,7 +62,6 @@
         <div class="vs-line"></div>
       </div>
 
-      <!-- Guest Side (Right) -->
       <div class="player-card guest-card" *ngIf="room.guestUserName; else waitingGuest">
         <div class="player-header">
           <div class="player-avatar">
@@ -84,7 +81,7 @@
           <div class="stat-item">
             <i class="fa fa-trophy"></i>
             <div class="stat-content">
-              <span class="stat-value">8</span>
+              <span class="stat-value">{{ getDisplayedGamesWon(guestUserInfo) }}</span>
               <span class="stat-label">Games Won</span>
             </div>
           </div>
@@ -92,7 +89,7 @@
           <div class="stat-item">
             <i class="fa fa-flag"></i>
             <div class="stat-content">
-              <span class="stat-value">76%</span>
+              <span class="stat-value">{{ getDisplayedAccuracy(guestUserInfo) }}</span>
               <span class="stat-label">Accuracy</span>
             </div>
           </div>
@@ -100,7 +97,7 @@
           <div class="stat-item">
             <i class="fa fa-clock"></i>
             <div class="stat-content">
-              <span class="stat-value">3.1s</span>
+              <span class="stat-value">2.3s</span>
               <span class="stat-label">Avg Time</span>
             </div>
           </div>
@@ -114,11 +111,10 @@
         </div>
       </div>
 
-      <!-- Waiting for Guest Template -->
       <ng-template #waitingGuest>
         <div class="player-card guest-card waiting">
           <div class="player-header">
-            <div class="player-avatar waiting">
+            <div class="player-avatar waiting clickable" (click)="toggleInviteForm()">
               <i class="fa fa-user-plus"></i>
             </div>
             <div class="player-info">
@@ -139,91 +135,134 @@
         </div>
       </ng-template>
     </div>
+  </div>
 
-    <!-- Friend Invitation Section -->
-    <div class="friend-invitation-section" *ngIf="isCurrentUserHost() && !room.guestUserName">
-      <h3>Invite a Friend</h3>
-      <p>Invite a friend to join your game by entering their game name</p>
+  <div class="continent-selection-section" *ngIf="room?.guestUserName">
+    <h3>
+      <i class="fa fa-globe"></i>
+      Game Continents
+      <span class="selected-count" *ngIf="getSelectedContinents().length > 0">
+        ({{ getSelectedContinents().length }} selected)
+      </span>
+    </h3>
+    <p *ngIf="isHost">Select which continents to include in the game:</p>
+    <p *ngIf="!isHost">Host has selected the following continents for this game:</p>
+    
+    <div class="continent-grid">
+      <label class="continent-card" *ngFor="let continent of availableContinents" [class.disabled]="!canEditContinents()" [class.selected]="continent.selected">
+        <input 
+          type="checkbox" 
+          [value]="continent.value" 
+          [(ngModel)]="continent.selected"
+          (change)="onContinentChange()"
+          [disabled]="!canEditContinents()">
+        <div class="continent-content">
+          <i class="fa fa-globe continent-icon"></i>
+          <span class="continent-name">{{ continent.label }}</span>
+          <i class="fa fa-check check-icon" *ngIf="continent.selected"></i>
+        </div>
+      </label>
+    </div>
+    
+    <div class="continent-actions" *ngIf="canEditContinents()">
+      <button class="action-btn" (click)="selectAllContinents()">
+        <i class="fa fa-globe"></i> Select All
+      </button>
+      <button class="action-btn" (click)="clearAllContinents()">
+        <i class="fa fa-times"></i> Clear All
+      </button>
+    </div>
+  </div>
+
+  <div class="friend-invitation-section" *ngIf="isCurrentUserHost() && !room?.guestUserName">
+    <h3>Invite a Friend</h3>
+    <p>Invite a friend to join your game by entering their game name</p>
+    
+    <div class="invitation-form" *ngIf="!showInviteForm">
+      <button class="btn-primary invite-btn" (click)="toggleInviteForm()">
+        <i class="fa fa-user-plus"></i>
+        Invite Friend
+      </button>
+    </div>
+    
+    <div class="invitation-form" *ngIf="showInviteForm">
+      <div class="form-group">
+        <label for="friendGameName">Friend's Game Name:</label>
+        <input 
+          type="text" 
+          id="friendGameName"
+          #friendGameNameInput
+          [(ngModel)]="friendGameName"
+          placeholder="Enter friend's game name"
+          class="form-input"
+          [disabled]="isInviting"
+          (keyup.enter)="inviteFriend()"
+        >
+      </div>
       
-      <div class="invitation-form" *ngIf="!showInviteForm">
-        <button class="btn-primary invite-btn" (click)="toggleInviteForm()">
-          <i class="fa fa-user-plus"></i>
-          Invite Friend
+      <div class="form-actions">
+        <button 
+          class="btn-primary" 
+          (click)="inviteFriend()"
+          [disabled]="isInviting || !friendGameName.trim()"
+        >
+          <i class="fa fa-paper-plane" *ngIf="!isInviting"></i>
+          <i class="fa fa-spinner fa-spin" *ngIf="isInviting"></i>
+          {{ isInviting ? 'Sending...' : 'Send Invitation' }}
+        </button>
+        <button 
+          class="btn-secondary" 
+          (click)="toggleInviteForm()"
+          [disabled]="isInviting"
+        >
+          Cancel
         </button>
       </div>
       
-      <div class="invitation-form" *ngIf="showInviteForm">
-        <div class="form-group">
-          <label for="friendGameName">Friend's Game Name:</label>
-          <input 
-            type="text" 
-            id="friendGameName"
-            [(ngModel)]="friendGameName"
-            placeholder="Enter friend's game name"
-            class="form-input"
-            [disabled]="isInviting"
-          >
-        </div>
-        
-        <div class="form-actions">
-          <button 
-            class="btn-primary" 
-            (click)="inviteFriend()"
-            [disabled]="isInviting || !friendGameName.trim()"
-          >
-            <i class="fa fa-paper-plane" *ngIf="!isInviting"></i>
-            <i class="fa fa-spinner fa-spin" *ngIf="isInviting"></i>
-            {{ isInviting ? 'Sending...' : 'Send Invitation' }}
-          </button>
-          <button 
-            class="btn-secondary" 
-            (click)="toggleInviteForm()"
-            [disabled]="isInviting"
-          >
-            Cancel
-          </button>
-        </div>
-        
-        <div class="invite-message" *ngIf="inviteMessage">
-          <div class="message" [class]="inviteMessage.includes('error') ? 'error' : 'success'">
-            <i class="fa" [class]="inviteMessage.includes('error') ? 'fa-exclamation-circle' : 'fa-check-circle'"></i>
-            {{ inviteMessage }}
-          </div>
+      <div class="invite-message" *ngIf="inviteMessage">
+        <div class="message" [class]="inviteMessage.includes('error') ? 'error' : 'success'">
+          <i class="fa" [class]="inviteMessage.includes('error') ? 'fa-exclamation-circle' : 'fa-check-circle'"></i>
+          {{ inviteMessage }}
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Start Game Section -->
-    <div class="start-game-section" *ngIf="room.guestUserName">
+  <div class="main-content">
+
+    <div class="start-game-section" *ngIf="room?.guestUserName">
       <h3>Ready to Start?</h3>
       <p>Both players are ready. Either player can start the game!</p>
       
-      <button class="btn-start-game" (click)="startGame()">
+      <button 
+        class="btn-start-game" 
+        (click)="startGame()"
+        [disabled]="getSelectedContinents().length === 0 || !isHost">
         <i class="fa fa-play"></i>
-        Start Game
+        <span *ngIf="isHost">Start Game</span>
+        <span *ngIf="!isHost">Waiting for Host to Start</span>
       </button>
+      
+      <div class="game-warning" *ngIf="getSelectedContinents().length === 0 && isHost">
+        <i class="fa fa-exclamation-triangle"></i>
+        Please select at least one continent to start the game
+      </div>
+      
+      <div class="game-info" *ngIf="!isHost">
+        <i class="fa fa-info-circle"></i>
+        Only the host can start the game
+      </div>
     </div>
 
-    <!-- Keep the existing game info section unchanged -->
     <div class="game-info-section">
       <h3>How to Play:</h3>
       <ol>
-        <li>Share the room ID with your friend</li>
-        <li>Wait for them to join</li>
+        <li>Invite your friend to join</li>
+        <li>Wait for them to accept</li>
         <li>Start the game when ready</li>
         <li>Identify flags as quickly as possible</li>
         <li>Highest score wins!</li>
       </ol>
-      
-      <div class="room-id-display">
-        <h4>Room ID to Share:</h4>
-        <div class="room-id-box">
-          <code>{{ room.id }}</code>
-          <button class="copy-btn" (click)="copyRoomId()">
-            <i class="fa fa-copy"></i>
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 

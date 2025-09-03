@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnDestroy, NgZone, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy, NgZone, ChangeDetectorRef, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -6,6 +6,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../services/auth/auth.service';
 import { WebSocketService } from '../services/websocket.service';
+import { UserService, UserInfo } from '../services/user.service';
 import { Subscription } from 'rxjs';
 
 const BASIC_URL = environment.apiUrl;
@@ -31,6 +32,7 @@ interface Room {
 })
 export class RoomComponent implements OnInit, OnDestroy {
   @Input() roomData: Room | null = null;
+  @ViewChild('friendGameNameInput') friendGameNameInput!: ElementRef<HTMLInputElement>;
   
   room: Room | null = null;
   roomId = '';
@@ -39,12 +41,25 @@ export class RoomComponent implements OnInit, OnDestroy {
   currentUsername = '';
   isHost = false;
 
-  // Friend invitation properties
   showInviteForm = false;
   friendGameName = '';
   isInviting = false;
   inviteMessage = '';
   private subscriptions: Subscription[] = [];
+
+  hostUserInfo: UserInfo | null = null;
+  guestUserInfo: UserInfo | null = null;
+  loadingUserInfo = false;
+
+  availableContinents = [
+    { value: 'ASIA', label: 'Asia', selected: false },
+    { value: 'AFRICA', label: 'Africa', selected: false },
+    { value: 'NORTH_AMERICA', label: 'North America', selected: false },
+    { value: 'SOUTH_AMERICA', label: 'South America', selected: false },
+    { value: 'EUROPE', label: 'Europe', selected: false },
+    { value: 'AUSTRALIA', label: 'Australia & Oceania', selected: false }
+  ];
+  showContinentSelection = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -52,68 +67,52 @@ export class RoomComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private authService: AuthService,
     private wsService: WebSocketService,
+    private userService: UserService,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {
     (window as any).ffOnRoomUpdate = (payload: any) => {
       if (payload && this.roomId && payload.id === this.roomId) {
-        // console.log('[RoomComponent] ffOnRoomUpdate applied');
         this.ngZone.run(() => {
           this.room = payload as Room;
           this.cdr.detectChanges();
           this.loadRoom();
+          this.loadUserInfo();
         });
       }
     };
   }
 
   ngOnInit(): void {
-    console.log('[RoomComponent] ngOnInit called');
-    
-    // Check if user is authenticated
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/login']);
       return;
     }
 
-    // Ensure WebSocket connection is established
-    console.log('[RoomComponent] Establishing WebSocket connection...');
+    this.selectAllContinents();
+
     this.wsService.connect();
     
-    // Subscribe to game started notifications FIRST - before any async operations
-    console.log('[RoomComponent] Setting up game-started subscription immediately');
     this.subscriptions.push(
       this.wsService.gameStarted$.subscribe({
         next: (gameData: any) => {
-          console.log('[RoomComponent] ✅ Game started notification received:', gameData);
-          console.log('[RoomComponent] Current roomId:', this.roomId);
-          console.log('[RoomComponent] Game data roomId:', gameData?.roomId);
-          
-          // Only navigate if the game notification is for THIS room
           if (gameData?.roomId === this.roomId) {
             this.ngZone.run(() => {
-              console.log('[RoomComponent] 🚀 Navigating to game for current room:', this.roomId);
               this.router.navigate(['/game', this.roomId]);
             });
           } else {
-            console.log('[RoomComponent] ⚠️ Ignoring game notification for different room:', gameData?.roomId);
           }
         },
         error: (error) => {
-          console.error('[RoomComponent] ❌ Error in game-started subscription:', error);
         },
         complete: () => {
-          console.log('[RoomComponent] Game-started subscription completed');
         }
       })
     );
     
-    // Add a small delay to ensure WebSocket subscriptions are ready
     setTimeout(() => {
-      console.log('[RoomComponent] WebSocket subscriptions should be ready');
     }, 1000);
 
-    // If room data is provided as input, use it directly
     if (this.roomData) {
       this.room = this.roomData;
       this.roomId = this.roomData.id;
@@ -121,24 +120,18 @@ export class RoomComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Get room ID from route parameters and check if user is host
     this.route.params.subscribe(params => {
       this.roomId = params['id'];
-      // console.log('[RoomComponent] Route param roomId set to:', this.roomId);
       if (this.roomId) {
-        // Check query params to see if user created this room
-        this.route.queryParams.subscribe(queryParams => {
-          this.isHost = queryParams['isHost'] === 'true';
-        });
+        this.isHost = localStorage.getItem(`room_${this.roomId}_isHost`) === 'true';
         this.loadRoom();
-        // Register room-specific WS handler AFTER roomId is known
         const handler = (roomUpdate: any) => {
-          // console.log('[RoomComponent] direct handler received for', this.roomId, roomUpdate);
           if (roomUpdate && roomUpdate.id && roomUpdate.id === this.roomId) {
             this.ngZone.run(() => {
               this.room = roomUpdate as Room;
               this.cdr.detectChanges();
               this.loadRoom();
+              this.loadUserInfo();
             });
           }
         };
@@ -147,26 +140,21 @@ export class RoomComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Fallback listener via DOM event in case DI stream misses
     const domListener = (e: any) => {
       const detail = e.detail;
-      // console.log('[RoomComponent] window event room-updated:', detail);
       if (detail && detail.id === this.roomId) {
         this.ngZone.run(() => {
           this.room = detail as Room;
           this.cdr.detectChanges();
           this.loadRoom();
+          this.loadUserInfo();
         });
       }
     };
     window.addEventListener('room-updated', domListener as EventListener);
-    // Store cleanup manually since it's not an RxJS subscription
     (this as any)._domListener = domListener;
 
-    // Listen for room-closed notifications
     const closedListener = (e: any) => {
-      // console.log('[RoomComponent] window event room-closed:', e.detail);
-      // If host, kick guest already handled via update; if guest, navigate out
       this.ngZone.run(() => {
         this.router.navigate(['/create-room']);
       });
@@ -174,40 +162,30 @@ export class RoomComponent implements OnInit, OnDestroy {
     window.addEventListener('room-closed', closedListener as EventListener);
     (this as any)._closedListener = closedListener;
 
-    // Subscribe to room updates from WebSocket service
     this.subscriptions.push(
       this.wsService.roomUpdates$.subscribe((roomUpdate: any) => {
-        // console.log('[RoomComponent] Room update received from WS service:', roomUpdate);
         if (roomUpdate && roomUpdate.id === this.roomId) {
           this.ngZone.run(() => {
-            // console.log('[RoomComponent] Updating room with WS data:', roomUpdate);
             this.room = roomUpdate as Room;
             this.cdr.detectChanges();
-            // Don't call loadRoom() here to avoid overwriting WS data with HTTP response
+            this.loadUserInfo();
           });
         }
       })
     );
 
-    // Game started subscription is now set up at the top of ngOnInit
-
-    // Fallback DOM event listener for game-started
     const gameStartedListener = (e: any) => {
-      console.log('[RoomComponent] DOM event game-started:', e.detail);
       this.ngZone.run(() => {
         this.router.navigate(['/game', this.roomId]);
       });
     };
     window.addEventListener('game-started', gameStartedListener);
     
-    // Store reference for cleanup
     (this as any).gameStartedListener = gameStartedListener;
 
-    // Subscribe to room closed notifications from WebSocket service
     this.subscriptions.push(
       this.wsService.roomClosed$.subscribe((roomClosed: any) => {
         this.ngZone.run(() => {
-          // console.log('[RoomComponent] Room closed received from WS service:', roomClosed);
           if (roomClosed && roomClosed.roomId === this.roomId) {
             this.errorMessage = roomClosed.message || 'The room has been closed by the host.';
             setTimeout(() => {
@@ -220,42 +198,33 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   setupRoom(): void {
-    // Room setup is handled by the calling context (localStorage vs route params)
   }
 
   loadRoom(): void {
     this.isLoading = true;
     this.errorMessage = null;
 
-    // Get current user info from auth service
     this.currentUsername = this.authService.getCurrentUserGameName();
-    console.log('LoadRoom - Current username set to:', this.currentUsername);
 
     const headers = new HttpHeaders()
       .set('Content-Type', 'application/json')
       .set('Accept', '*/*');
 
-    // Auth interceptor will add the Authorization header
     this.http.get<Room>(`${BASIC_URL}rooms/${this.roomId}`, { headers })
       .subscribe({
         next: (response) => {
-          // console.log('Room loaded:', response);
-          // Avoid overwriting newer WS-updated state with stale HTTP response
           if (
             this.room && this.room.id === response.id &&
             this.room.guestUserName && !response.guestUserName
           ) {
-            // console.log('Ignoring stale room HTTP response in favor of WS-updated state');
           } else {
             this.room = response;
-            // Host status is already set from query params if user created room
-            // No need to check with backend - creator is automatically host
             this.setupRoom();
+            this.loadUserInfo();
           }
           this.isLoading = false;
         },
         error: (error) => {
-          // console.error('Error loading room:', error);
           this.isLoading = false;
           
           if (error.status === 404) {
@@ -286,7 +255,6 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.isInviting = true;
     this.inviteMessage = '';
 
-    // Send invitation via REST API
     const headers = new HttpHeaders()
       .set('Content-Type', 'application/json')
       .set('Accept', '*/*');
@@ -298,19 +266,16 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.http.post(`${BASIC_URL}rooms/invite`, inviteRequest, { headers })
       .subscribe({
         next: (response: any) => {
-          // console.log('Friend invitation sent:', response);
           this.inviteMessage = `Invitation sent to ${this.friendGameName}!`;
           this.friendGameName = '';
           this.showInviteForm = false;
           this.isInviting = false;
 
-          // Clear message after 3 seconds
           setTimeout(() => {
             this.inviteMessage = '';
           }, 3000);
         },
         error: (error) => {
-          // console.error('Error sending friend invitation:', error);
           this.inviteMessage = error.error?.message || 'Failed to send invitation. Please try again.';
           this.isInviting = false;
         }
@@ -322,6 +287,13 @@ export class RoomComponent implements OnInit, OnDestroy {
     if (!this.showInviteForm) {
       this.friendGameName = '';
       this.inviteMessage = '';
+    } else {
+      setTimeout(() => {
+        if (this.friendGameNameInput) {
+          this.friendGameNameInput.nativeElement.focus();
+          this.friendGameNameInput.nativeElement.select();
+        }
+      }, 0);
     }
   }
 
@@ -336,26 +308,31 @@ export class RoomComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const selectedContinents = this.getSelectedContinents();
+    if (selectedContinents.length === 0) {
+      this.errorMessage = 'Please select at least one continent';
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = null;
 
-    // Call backend to start the game
-    const startGameRequest = { roomId: this.room.id };
+    const startGameRequest = { 
+      roomId: this.room.id,
+      continents: selectedContinents
+    };
     
     this.http.post(`${BASIC_URL}games/start`, startGameRequest, {
       headers: this.getAuthHeaders()
     }).subscribe({
       next: (response: any) => {
-        // console.log('Game started successfully:', response);
         this.inviteMessage = 'Game is starting...';
         
-        // Navigate to game component after a short delay
         setTimeout(() => {
           this.router.navigate(['/game', this.room!.id]);
         }, 1500);
       },
       error: (error) => {
-        // console.error('Error starting game:', error);
         this.errorMessage = error.error?.message || 'Failed to start game';
         this.isLoading = false;
       }
@@ -374,11 +351,9 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.http.post(`${BASIC_URL}rooms/cancel`, {}, { headers })
       .subscribe({
         next: () => {
-          // console.log('Left room successfully');
           this.router.navigate(['/create-room']);
         },
         error: (error) => {
-          // console.error('Error leaving room:', error);
           this.errorMessage = 'Failed to leave room. Please try again.';
         }
       });
@@ -387,24 +362,12 @@ export class RoomComponent implements OnInit, OnDestroy {
   copyRoomId(): void {
     if (this.room) {
       navigator.clipboard.writeText(this.room.id).then(() => {
-        // You could add a toast notification here
-        // console.log('Room ID copied to clipboard');
       }).catch(err => {
-        console.error('Failed to copy room ID:', err);
       });
     }
   }
 
   getUserProfilePicture(username: string): string | null {
-    // TODO: This should be replaced with actual user profile picture logic
-    // For now, we'll return null to show the fallback icons
-    // In a real app, this would fetch from user service or API
-    
-    // Example of how it could work:
-    // return this.userService.getProfilePicture(username);
-    
-    // For demo purposes, you could uncomment this to test with placeholder images:
-    // return `https://via.placeholder.com/60x60/667eea/ffffff?text=${username.charAt(0).toUpperCase()}`;
     
     return null;
   }
@@ -444,18 +407,14 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   private sendLeaveRoomBeacon(): void {
     const token = this.getTokenFromCookie();
-    // console.log('[RoomComponent] sendLeaveRoomBeacon called, token found:', !!token);
     if (!token) return;
 
     const data = new FormData();
     data.append('token', token);
 
-    // Use sendBeacon for reliable delivery during page unload
     if (navigator.sendBeacon) {
-      // console.log('[RoomComponent] Sending beacon request to leave room');
       navigator.sendBeacon(`${BASIC_URL}rooms/cancel`, data);
     } else {
-      // console.log('[RoomComponent] sendBeacon not supported');
     }
   }
 
@@ -468,5 +427,88 @@ export class RoomComponent implements OnInit, OnDestroy {
       }
     }
     return null;
+  }
+
+  private loadUserInfo(): void {
+    if (!this.room) {
+      return;
+    }
+
+    this.loadingUserInfo = true;
+
+    if (this.room.hostUserName) {
+      this.userService.getUserInfo(this.room.hostUserName).subscribe({
+        next: (userInfo) => {
+          this.hostUserInfo = userInfo;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.hostUserInfo = { userName: this.room!.hostUserName };
+        }
+      });
+    }
+
+    if (this.room.guestUserName) {
+      this.userService.getUserInfo(this.room.guestUserName).subscribe({
+        next: (userInfo) => {
+          this.guestUserInfo = userInfo;
+          this.loadingUserInfo = false;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.guestUserInfo = { userName: this.room!.guestUserName! };
+          this.loadingUserInfo = false;
+        }
+      });
+    } else {
+      this.guestUserInfo = null;
+      this.loadingUserInfo = false;
+    }
+  }
+
+  getDisplayedGamesWon(userInfo: UserInfo | null): string {
+    const result = userInfo?.numberOfWonGame !== undefined ? userInfo.numberOfWonGame.toString() : '0';
+    return result;
+  }
+
+  getDisplayedAccuracy(userInfo: UserInfo | null): string {
+    const result = userInfo?.accuracyPercentage !== undefined ? `${userInfo.accuracyPercentage}%` : '0%';
+    return result;
+  }
+
+  onContinentChange(): void {
+  }
+
+  toggleContinentSelection(): void {
+    this.showContinentSelection = !this.showContinentSelection;
+  }
+
+  canEditContinents(): boolean {
+    return this.isHost;
+  }
+
+  selectAllContinents(): void {
+    this.availableContinents.forEach(continent => {
+      continent.selected = true;
+    });
+  }
+
+  clearAllContinents(): void {
+    this.availableContinents.forEach(continent => {
+      continent.selected = false;
+    });
+  }
+
+  getSelectedContinents(): string[] {
+    return this.availableContinents
+      .filter(continent => continent.selected)
+      .map(continent => continent.value);
+  }
+
+  getSelectedContinentsText(): string {
+    const selected = this.availableContinents
+      .filter(continent => continent.selected)
+      .map(continent => continent.label);
+    return selected.join(', ');
   }
 }

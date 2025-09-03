@@ -23,7 +23,6 @@ export class ResendVerificationEmailComponent {
 
   onSubmit(): void {
     if (this.emailForm.valid) {
-      // Here you would typically call your API to resend verification email
       this.successMessage = 'If an account with that email exists, a verification email has been sent.';
       setTimeout(() => {
         this.router.navigate(['/login']);
