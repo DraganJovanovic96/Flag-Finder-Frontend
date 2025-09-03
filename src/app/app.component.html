@@ -8,14 +8,17 @@
     <router-outlet></router-outlet>
   </main>
 
-  <!-- Invite Modal -->
-  <div class="invite-modal" *ngIf="pendingInvite as inv">
+  <!-- Invite Notification -->
+  <div #inviteModal 
+       class="invite-modal" 
+       [class.closing]="isClosing"
+       *ngIf="pendingInvite as inv">
     <div class="invite-card">
       <h3>Game Invitation</h3>
       <p><strong>{{ inv.initiatorUserName }}</strong> invited you to join a game.</p>
       <div class="actions">
-        <button class="btn-primary" (click)="acceptInvite()">Accept</button>
         <button class="btn-secondary" (click)="declineInvite()">Decline</button>
+        <button class="btn-primary" (click)="acceptInvite()">Accept</button>
       </div>
     </div>
   </div>

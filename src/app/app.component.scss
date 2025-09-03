@@ -47,54 +47,121 @@
   position: relative;
   z-index: 20;
 }
-/* Invite modal styling */
+/* Invite notification styling */
 .invite-modal {
   position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.4);
+  bottom: 30px;
+  right: 30px;
   z-index: 1000;
+  animation: slideIn 0.3s ease-out forwards;
+  max-width: 350px;
+  width: calc(100% - 60px);
+  
+  &.closing {
+    animation: slideOut 0.3s ease-in forwards;
+  }
 }
 
 .invite-card {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
-  padding: 20px;
-  width: 320px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  text-align: center;
+  padding: 18px 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+  transform: translate3d(0, 0, 0);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #667eea, #764ba2);
+  }
 }
 
 .invite-card h3 {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
+  color: #2d3748;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: left;
+  padding-left: 12px;
 }
 
 .invite-card p {
   margin: 0 0 16px;
+  color: #4a5568;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  text-align: left;
+  padding-left: 12px;
 }
 
 .actions {
   display: flex;
-  gap: 12px;
-  justify-content: center;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 
 .btn-primary, .btn-secondary {
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
   border: none;
   cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  min-width: 80px;
+  text-align: center;
 }
 
 .btn-primary {
-  background: #667eea;
-  color: #fff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
 }
 
 .btn-secondary {
-  background: #e2e8f0;
+  background: #f7fafc;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+  
+  &:hover {
+    background: #edf2f7;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  to {
+    transform: translateY(100px);
+    opacity: 0;
+  }
 }
 
 /* Ensure routed views display normally */
