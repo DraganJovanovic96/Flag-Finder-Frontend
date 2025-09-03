@@ -26,7 +26,7 @@
           <div class="stat-item">
             <i class="fa fa-trophy"></i>
             <div class="stat-content">
-              <span class="stat-value">12</span>
+              <span class="stat-value">{{ getDisplayedGamesWon(hostUserInfo) }}</span>
               <span class="stat-label">Games Won</span>
             </div>
           </div>
@@ -34,7 +34,7 @@
           <div class="stat-item">
             <i class="fa fa-flag"></i>
             <div class="stat-content">
-              <span class="stat-value">89%</span>
+              <span class="stat-value">{{ getDisplayedAccuracy(hostUserInfo) }}</span>
               <span class="stat-label">Accuracy</span>
             </div>
           </div>
@@ -84,7 +84,7 @@
           <div class="stat-item">
             <i class="fa fa-trophy"></i>
             <div class="stat-content">
-              <span class="stat-value">8</span>
+              <span class="stat-value">{{ getDisplayedGamesWon(guestUserInfo) }}</span>
               <span class="stat-label">Games Won</span>
             </div>
           </div>
@@ -92,7 +92,7 @@
           <div class="stat-item">
             <i class="fa fa-flag"></i>
             <div class="stat-content">
-              <span class="stat-value">76%</span>
+              <span class="stat-value">{{ getDisplayedAccuracy(guestUserInfo) }}</span>
               <span class="stat-label">Accuracy</span>
             </div>
           </div>
@@ -100,7 +100,7 @@
           <div class="stat-item">
             <i class="fa fa-clock"></i>
             <div class="stat-content">
-              <span class="stat-value">3.1s</span>
+              <span class="stat-value">2.3s</span>
               <span class="stat-label">Avg Time</span>
             </div>
           </div>

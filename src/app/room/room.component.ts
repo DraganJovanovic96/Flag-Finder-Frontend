@@ -6,6 +6,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../services/auth/auth.service';
 import { WebSocketService } from '../services/websocket.service';
+import { UserService, UserInfo } from '../services/user.service';
 import { Subscription } from 'rxjs';
 
 const BASIC_URL = environment.apiUrl;
@@ -47,12 +48,18 @@ export class RoomComponent implements OnInit, OnDestroy {
   inviteMessage = '';
   private subscriptions: Subscription[] = [];
 
+  // User info properties
+  hostUserInfo: UserInfo | null = null;
+  guestUserInfo: UserInfo | null = null;
+  loadingUserInfo = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
     private authService: AuthService,
     private wsService: WebSocketService,
+    private userService: UserService,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {
@@ -63,6 +70,7 @@ export class RoomComponent implements OnInit, OnDestroy {
           this.room = payload as Room;
           this.cdr.detectChanges();
           this.loadRoom();
+          this.loadUserInfo();
         });
       }
     };
@@ -138,6 +146,7 @@ export class RoomComponent implements OnInit, OnDestroy {
               this.room = roomUpdate as Room;
               this.cdr.detectChanges();
               this.loadRoom();
+              this.loadUserInfo();
             });
           }
         };
@@ -155,6 +164,7 @@ export class RoomComponent implements OnInit, OnDestroy {
           this.room = detail as Room;
           this.cdr.detectChanges();
           this.loadRoom();
+          this.loadUserInfo();
         });
       }
     };
@@ -182,6 +192,7 @@ export class RoomComponent implements OnInit, OnDestroy {
             // console.log('[RoomComponent] Updating room with WS data:', roomUpdate);
             this.room = roomUpdate as Room;
             this.cdr.detectChanges();
+            this.loadUserInfo();
             // Don't call loadRoom() here to avoid overwriting WS data with HTTP response
           });
         }
@@ -250,6 +261,7 @@ export class RoomComponent implements OnInit, OnDestroy {
             // Host status is already set from query params if user created room
             // No need to check with backend - creator is automatically host
             this.setupRoom();
+            this.loadUserInfo();
           }
           this.isLoading = false;
         },
@@ -475,5 +487,68 @@ export class RoomComponent implements OnInit, OnDestroy {
       }
     }
     return null;
+  }
+
+  private loadUserInfo(): void {
+    if (!this.room) {
+      console.log('[UserInfo] No room available, skipping user info load');
+      return;
+    }
+
+    console.log('[UserInfo] Loading user info for room:', this.room.id);
+    console.log('[UserInfo] Host:', this.room.hostUserName, 'Guest:', this.room.guestUserName);
+    this.loadingUserInfo = true;
+
+    // Load host user info
+    if (this.room.hostUserName) {
+      console.log('[UserInfo] Fetching host user info for:', this.room.hostUserName);
+      this.userService.getUserInfo(this.room.hostUserName).subscribe({
+        next: (userInfo) => {
+          console.log('[UserInfo] Host user info received:', userInfo);
+          this.hostUserInfo = userInfo;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('[UserInfo] Error loading host user info:', error);
+          console.error('[UserInfo] Error details:', error.error);
+          this.hostUserInfo = { userName: this.room!.hostUserName };
+        }
+      });
+    }
+
+    // Load guest user info if guest exists
+    if (this.room.guestUserName) {
+      console.log('[UserInfo] Fetching guest user info for:', this.room.guestUserName);
+      this.userService.getUserInfo(this.room.guestUserName).subscribe({
+        next: (userInfo) => {
+          console.log('[UserInfo] Guest user info received:', userInfo);
+          this.guestUserInfo = userInfo;
+          this.loadingUserInfo = false;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('[UserInfo] Error loading guest user info:', error);
+          console.error('[UserInfo] Error details:', error.error);
+          this.guestUserInfo = { userName: this.room!.guestUserName! };
+          this.loadingUserInfo = false;
+        }
+      });
+    } else {
+      console.log('[UserInfo] No guest user, skipping guest info load');
+      this.guestUserInfo = null;
+      this.loadingUserInfo = false;
+    }
+  }
+
+  getDisplayedGamesWon(userInfo: UserInfo | null): string {
+    const result = userInfo?.numberOfWonGame !== undefined ? userInfo.numberOfWonGame.toString() : '0';
+    console.log('[UserInfo] getDisplayedGamesWon for', userInfo?.userName, ':', result, 'raw value:', userInfo?.numberOfWonGame);
+    return result;
+  }
+
+  getDisplayedAccuracy(userInfo: UserInfo | null): string {
+    const result = userInfo?.accuracyPercentage !== undefined ? `${userInfo.accuracyPercentage}%` : '0%';
+    console.log('[UserInfo] getDisplayedAccuracy for', userInfo?.userName, ':', result, 'raw value:', userInfo?.accuracyPercentage);
+    return result;
   }
 }
