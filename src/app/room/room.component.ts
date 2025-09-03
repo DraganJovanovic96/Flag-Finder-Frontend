@@ -53,6 +53,17 @@ export class RoomComponent implements OnInit, OnDestroy {
   guestUserInfo: UserInfo | null = null;
   loadingUserInfo = false;
 
+  // Continent selection properties
+  availableContinents = [
+    { value: 'ASIA', label: 'Asia', selected: false },
+    { value: 'AFRICA', label: 'Africa', selected: false },
+    { value: 'NORTH_AMERICA', label: 'North America', selected: false },
+    { value: 'SOUTH_AMERICA', label: 'South America', selected: false },
+    { value: 'EUROPE', label: 'Europe', selected: false },
+    { value: 'AUSTRALIA', label: 'Australia & Oceania', selected: false }
+  ];
+  showContinentSelection = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -84,6 +95,9 @@ export class RoomComponent implements OnInit, OnDestroy {
       this.router.navigate(['/login']);
       return;
     }
+
+    // Initialize continent selection - select all by default
+    this.selectAllContinents();
 
     // Ensure WebSocket connection is established
     console.log('[RoomComponent] Establishing WebSocket connection...');
@@ -355,11 +369,20 @@ export class RoomComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const selectedContinents = this.getSelectedContinents();
+    if (selectedContinents.length === 0) {
+      this.errorMessage = 'Please select at least one continent';
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = null;
 
-    // Call backend to start the game
-    const startGameRequest = { roomId: this.room.id };
+    // Call backend to start the game with selected continents
+    const startGameRequest = { 
+      roomId: this.room.id,
+      continents: selectedContinents
+    };
     
     this.http.post(`${BASIC_URL}games/start`, startGameRequest, {
       headers: this.getAuthHeaders()
@@ -550,5 +573,44 @@ export class RoomComponent implements OnInit, OnDestroy {
     const result = userInfo?.accuracyPercentage !== undefined ? `${userInfo.accuracyPercentage}%` : '0%';
     console.log('[UserInfo] getDisplayedAccuracy for', userInfo?.userName, ':', result, 'raw value:', userInfo?.accuracyPercentage);
     return result;
+  }
+
+  // Continent selection methods
+  onContinentChange(): void {
+    // This method is called when continent checkboxes change
+    // We can add validation or other logic here if needed
+  }
+
+  toggleContinentSelection(): void {
+    this.showContinentSelection = !this.showContinentSelection;
+  }
+
+  canEditContinents(): boolean {
+    return this.isHost;
+  }
+
+  selectAllContinents(): void {
+    this.availableContinents.forEach(continent => {
+      continent.selected = true;
+    });
+  }
+
+  clearAllContinents(): void {
+    this.availableContinents.forEach(continent => {
+      continent.selected = false;
+    });
+  }
+
+  getSelectedContinents(): string[] {
+    return this.availableContinents
+      .filter(continent => continent.selected)
+      .map(continent => continent.value);
+  }
+
+  getSelectedContinentsText(): string {
+    const selected = this.availableContinents
+      .filter(continent => continent.selected)
+      .map(continent => continent.label);
+    return selected.join(', ');
   }
 }

@@ -139,71 +139,126 @@
         </div>
       </ng-template>
     </div>
+  </div>
 
-    <!-- Friend Invitation Section -->
-    <div class="friend-invitation-section" *ngIf="isCurrentUserHost() && !room.guestUserName">
-      <h3>Invite a Friend</h3>
-      <p>Invite a friend to join your game by entering their game name</p>
+  <!-- Continent Selection Section (card style) -->
+  <div class="continent-selection-section" *ngIf="room?.guestUserName">
+    <h3>
+      <i class="fa fa-globe"></i>
+      Game Continents
+      <span class="selected-count" *ngIf="getSelectedContinents().length > 0">
+        ({{ getSelectedContinents().length }} selected)
+      </span>
+    </h3>
+    <p *ngIf="isHost">Select which continents to include in the game:</p>
+    <p *ngIf="!isHost">Host has selected the following continents for this game:</p>
+    
+    <div class="continent-grid">
+      <label class="continent-card" *ngFor="let continent of availableContinents" [class.disabled]="!canEditContinents()" [class.selected]="continent.selected">
+        <input 
+          type="checkbox" 
+          [value]="continent.value" 
+          [(ngModel)]="continent.selected"
+          (change)="onContinentChange()"
+          [disabled]="!canEditContinents()">
+        <div class="continent-content">
+          <i class="fa fa-globe continent-icon"></i>
+          <span class="continent-name">{{ continent.label }}</span>
+          <i class="fa fa-check check-icon" *ngIf="continent.selected"></i>
+        </div>
+      </label>
+    </div>
+    
+    <div class="continent-actions" *ngIf="canEditContinents()">
+      <button class="action-btn" (click)="selectAllContinents()">
+        <i class="fa fa-globe"></i> Select All
+      </button>
+      <button class="action-btn" (click)="clearAllContinents()">
+        <i class="fa fa-times"></i> Clear All
+      </button>
+    </div>
+  </div>
+
+  <!-- Friend Invitation Section -->
+  <div class="friend-invitation-section" *ngIf="isCurrentUserHost() && !room?.guestUserName">
+    <h3>Invite a Friend</h3>
+    <p>Invite a friend to join your game by entering their game name</p>
+    
+    <div class="invitation-form" *ngIf="!showInviteForm">
+      <button class="btn-primary invite-btn" (click)="toggleInviteForm()">
+        <i class="fa fa-user-plus"></i>
+        Invite Friend
+      </button>
+    </div>
+    
+    <div class="invitation-form" *ngIf="showInviteForm">
+      <div class="form-group">
+        <label for="friendGameName">Friend's Game Name:</label>
+        <input 
+          type="text" 
+          id="friendGameName"
+          #friendGameNameInput
+          [(ngModel)]="friendGameName"
+          placeholder="Enter friend's game name"
+          class="form-input"
+          [disabled]="isInviting"
+          (keyup.enter)="inviteFriend()"
+        >
+      </div>
       
-      <div class="invitation-form" *ngIf="!showInviteForm">
-        <button class="btn-primary invite-btn" (click)="toggleInviteForm()">
-          <i class="fa fa-user-plus"></i>
-          Invite Friend
+      <div class="form-actions">
+        <button 
+          class="btn-primary" 
+          (click)="inviteFriend()"
+          [disabled]="isInviting || !friendGameName.trim()"
+        >
+          <i class="fa fa-paper-plane" *ngIf="!isInviting"></i>
+          <i class="fa fa-spinner fa-spin" *ngIf="isInviting"></i>
+          {{ isInviting ? 'Sending...' : 'Send Invitation' }}
+        </button>
+        <button 
+          class="btn-secondary" 
+          (click)="toggleInviteForm()"
+          [disabled]="isInviting"
+        >
+          Cancel
         </button>
       </div>
       
-      <div class="invitation-form" *ngIf="showInviteForm">
-        <div class="form-group">
-          <label for="friendGameName">Friend's Game Name:</label>
-          <input 
-            type="text" 
-            id="friendGameName"
-            #friendGameNameInput
-            [(ngModel)]="friendGameName"
-            placeholder="Enter friend's game name"
-            class="form-input"
-            [disabled]="isInviting"
-            (keyup.enter)="inviteFriend()"
-          >
-        </div>
-        
-        <div class="form-actions">
-          <button 
-            class="btn-primary" 
-            (click)="inviteFriend()"
-            [disabled]="isInviting || !friendGameName.trim()"
-          >
-            <i class="fa fa-paper-plane" *ngIf="!isInviting"></i>
-            <i class="fa fa-spinner fa-spin" *ngIf="isInviting"></i>
-            {{ isInviting ? 'Sending...' : 'Send Invitation' }}
-          </button>
-          <button 
-            class="btn-secondary" 
-            (click)="toggleInviteForm()"
-            [disabled]="isInviting"
-          >
-            Cancel
-          </button>
-        </div>
-        
-        <div class="invite-message" *ngIf="inviteMessage">
-          <div class="message" [class]="inviteMessage.includes('error') ? 'error' : 'success'">
-            <i class="fa" [class]="inviteMessage.includes('error') ? 'fa-exclamation-circle' : 'fa-check-circle'"></i>
-            {{ inviteMessage }}
-          </div>
+      <div class="invite-message" *ngIf="inviteMessage">
+        <div class="message" [class]="inviteMessage.includes('error') ? 'error' : 'success'">
+          <i class="fa" [class]="inviteMessage.includes('error') ? 'fa-exclamation-circle' : 'fa-check-circle'"></i>
+          {{ inviteMessage }}
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="main-content">
 
     <!-- Start Game Section -->
-    <div class="start-game-section" *ngIf="room.guestUserName">
+    <div class="start-game-section" *ngIf="room?.guestUserName">
       <h3>Ready to Start?</h3>
       <p>Both players are ready. Either player can start the game!</p>
       
-      <button class="btn-start-game" (click)="startGame()">
+      <button 
+        class="btn-start-game" 
+        (click)="startGame()"
+        [disabled]="getSelectedContinents().length === 0 || !isHost">
         <i class="fa fa-play"></i>
-        Start Game
+        <span *ngIf="isHost">Start Game</span>
+        <span *ngIf="!isHost">Waiting for Host to Start</span>
       </button>
+      
+      <div class="game-warning" *ngIf="getSelectedContinents().length === 0 && isHost">
+        <i class="fa fa-exclamation-triangle"></i>
+        Please select at least one continent to start the game
+      </div>
+      
+      <div class="game-info" *ngIf="!isHost">
+        <i class="fa fa-info-circle"></i>
+        Only the host can start the game
+      </div>
     </div>
 
     <!-- Keep the existing game info section unchanged -->
