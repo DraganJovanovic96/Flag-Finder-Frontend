@@ -37,7 +37,6 @@ export class AppComponent implements OnInit {
   }
 
   private showInvite(invite: any): void {
-    // Clear any pending timeouts
     if (this.closingTimeout) {
       clearTimeout(this.closingTimeout);
       this.closingTimeout = null;
@@ -46,7 +45,6 @@ export class AppComponent implements OnInit {
     this.isClosing = false;
     this.pendingInvite = invite;
     
-    // Auto-dismiss after 30 seconds if user doesn't respond
     this.closingTimeout = setTimeout(() => {
       this.dismissInvite();
     }, 30000);
@@ -57,7 +55,6 @@ export class AppComponent implements OnInit {
     
     this.isClosing = true;
     
-    // Wait for the slide-out animation to complete before removing the invite
     setTimeout(() => {
       this.pendingInvite = null;
       this.isClosing = false;
@@ -66,7 +63,7 @@ export class AppComponent implements OnInit {
         clearTimeout(this.closingTimeout);
         this.closingTimeout = null;
       }
-    }, 300); // Match this with the CSS animation duration
+    }, 300); 
   }
 
   acceptInvite(): void {
