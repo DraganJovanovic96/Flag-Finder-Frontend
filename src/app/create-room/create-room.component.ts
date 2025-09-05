@@ -101,6 +101,7 @@ export class CreateRoomComponent implements OnInit {
   }
 
   goToProfile(): void {
+    this.router.navigate(['/profile']);
   }
 
   logout(): void {

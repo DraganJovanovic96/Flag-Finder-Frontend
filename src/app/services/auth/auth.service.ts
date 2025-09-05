@@ -119,7 +119,7 @@ export class AuthService {
     
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const username = payload.sub || payload.username || payload.email || payload.gameName || '';
+      const username = payload.gameName || payload.sub || payload.username || payload.email || '';
       if (!username) {
         return 'drgghouse';
       }

@@ -1,0 +1,97 @@
+<div class="profile-container">
+  <header class="page-header">
+    <h1>🏆 Game History</h1>
+    <p>Your FlagFinder journey and achievements</p>
+  </header>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading your game history...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    <i class="fa fa-exclamation-circle"></i>
+    {{ errorMessage }}
+    <button (click)="loadGameHistory()" class="retry-btn">
+      <i class="fa fa-refresh"></i>
+      Retry
+    </button>
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage" class="history-content">
+    <div *ngIf="gameHistory.length === 0" class="no-games">
+      <div class="no-games-icon">
+        <i class="fa fa-flag"></i>
+      </div>
+      <h3>No games played yet</h3>
+      <p>Start playing to build your game history!</p>
+      <button (click)="goBack()" class="btn-primary">
+        <i class="fa fa-play"></i>
+        Start Playing
+      </button>
+    </div>
+
+    <div *ngIf="gameHistory.length > 0" class="games-list">
+      <div class="stats-summary">
+        <div class="stat-card">
+          <div class="stat-number">{{ gameHistory.length }}</div>
+          <div class="stat-label">Games Played</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ getWonGamesCount() }}</div>
+          <div class="stat-label">Games Won</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ getDrawGamesCount() }}</div>
+          <div class="stat-label">Draws</div>
+        </div>
+      </div>
+
+      <div class="game-card" *ngFor="let game of gameHistory; let i = index">
+        <div class="game-header">
+          <div class="game-info">
+            <div class="game-number">#{{ gameHistory.length - i }}</div>
+            <div class="players">
+              <span class="player" [class.current-user]="isCurrentUser(game.hostUserName)">{{ getDisplayName(game.hostUserName) }}</span>
+              <span class="vs">VS</span>
+              <span class="player" [class.current-user]="isCurrentUser(game.guestUserName)">{{ getDisplayName(game.guestUserName) }}</span>
+            </div>
+          </div>
+          <div class="game-result" [class]="getGameResultClass(game)">
+            <div class="result-text">{{ getGameResult(game) }}</div>
+            <div class="score">{{ getUserScore(game) }} - {{ getOpponentScore(game) }}</div>
+          </div>
+        </div>
+
+        <div class="rounds-section">
+          <h4>Rounds ({{ game.roundDtos.length }})</h4>
+          <div class="rounds-grid">
+            <div class="round-item" *ngFor="let round of getSortedRounds(game.roundDtos)">
+              <div class="round-number">{{ round.roundNumber }}</div>
+              <div class="flag-container">
+                <img 
+                  [src]="getFlagUrl(round.countryId)" 
+                  [alt]="round.countryName + ' flag'"
+                  class="round-flag"
+                  onerror="this.style.display='none'"
+                />
+              </div>
+              <div class="country-name">{{ round.countryName }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn" (click)="goBack()">
+      <i class="fa fa-arrow-left"></i>
+      Back to Home
+    </button>
+    <button class="nav-btn" (click)="logout()">
+      <i class="fa fa-sign-out-alt"></i>
+      Logout
+    </button>
+  </nav>
+</div>
