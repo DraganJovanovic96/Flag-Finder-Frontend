@@ -406,6 +406,10 @@ export class GameComponent implements OnInit, OnDestroy {
     return this.cachedFlagUrl;
   }
 
+  getRoundFlagUrl(countryId: string): string {
+    return `${BASIC_URL}countries/${countryId}/flag`;
+  }
+
   getCountdownText(): string {
     if (this.startCountdown > 0) {
       return this.startCountdown.toString();

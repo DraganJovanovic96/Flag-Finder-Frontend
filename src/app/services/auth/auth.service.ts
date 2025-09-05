@@ -41,7 +41,7 @@ export class AuthService {
           if (res.refresh_token) {
             this.cookieService.setCookie('refresh_token', res.refresh_token, false); // 30 days
           }
-          this.router.navigate(['/create-room']);
+          this.router.navigate(['/home']);
           return true;
         }
         return false;

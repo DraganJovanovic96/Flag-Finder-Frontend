@@ -12,7 +12,7 @@ import { GameComponent } from './game/game.component';
 export const routes: Routes = [
     {
         path: "",
-        redirectTo: '/login',
+        redirectTo: '/home',
         pathMatch: 'full'
     },
     
@@ -22,7 +22,7 @@ export const routes: Routes = [
     },
 
     {
-        path: "create-room",
+        path: "home",
         component: CreateRoomComponent
     },
 
@@ -61,5 +61,5 @@ export const routes: Routes = [
         component: ResendVerificationEmailComponent
     },
 
-    { path: '**', redirectTo: '/login' }
+    { path: '**', redirectTo: '/home' }
 ];

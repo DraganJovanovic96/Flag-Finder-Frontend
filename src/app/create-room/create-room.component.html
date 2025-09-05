@@ -1,40 +1,91 @@
-<div class="create-room-container">
+<div class="home-container">
   <header class="page-header">
-    <h1>Create a New Game Room</h1>
-    <p>Start your FlagFinder adventure!</p>
+    <h1>FlagFinder</h1>
+    <p>Choose your adventure and test your flag knowledge!</p>
   </header>
 
-  <div class="content-wrapper">
-    <div class="form-section">
-      <div class="form-info">
-        <h3>Ready to Play?</h3>
-        <p>Click the button below to create a new game room. You'll be able to invite friends and start playing immediately!</p>
+  <div class="game-modes">
+    <!-- Multiplayer Section -->
+    <div class="game-mode multiplayer">
+      <div class="mode-header">
+        <div class="mode-icon">
+          <i class="fa fa-users"></i>
+        </div>
+        <h2>Multiplayer</h2>
+        <p>Challenge a friend to an epic flag battle!</p>
       </div>
-
-      <form [formGroup]="createRoomForm" (ngSubmit)="onSubmit()" class="create-room-form">
-        <button type="submit" class="btn-create-room" [disabled]="isLoading">
-          <i class="fa fa-gamepad" *ngIf="!isLoading"></i>
-          <i class="fa fa-spinner fa-spin" *ngIf="isLoading"></i>
-          {{ isLoading ? 'Creating Room...' : 'Create Room' }}
-        </button>
-      </form>
-
-      <div class="error-message" *ngIf="errorMessage">
-        <i class="fa fa-exclamation-circle"></i>
-        {{ errorMessage }}
+      
+      <div class="mode-content">
+        <form [formGroup]="createRoomForm" (ngSubmit)="onSubmit()" class="game-form">
+          <div class="form-group">
+          </div>
+          
+          <button type="submit" class="btn-create multiplayer-btn" [disabled]="isLoading || createRoomForm.invalid">
+            <i class="fa fa-gamepad" *ngIf="!isLoading"></i>
+            <i class="fa fa-spinner fa-spin" *ngIf="isLoading"></i>
+            {{ isLoading ? 'Creating Room...' : 'Create Multiplayer Room' }}
+          </button>
+        </form>
+        
+        <div class="mode-features">
+          <div class="feature">
+            <i class="fa fa-user-plus"></i>
+            <span>Invite friends</span>
+          </div>
+          <div class="feature">
+            <i class="fa fa-trophy"></i>
+            <span>Compete for high scores</span>
+          </div>
+          <div class="feature">
+            <i class="fa fa-clock"></i>
+            <span>Real-time gameplay</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="info-section">
-      <h3>How It Works</h3>
-      <ol>
-        <li>Create a room with one click</li>
-        <li>Share the room ID with friends</li>
-        <li>Wait for them to join</li>
-        <li>Start the game when ready</li>
-        <li>Compete to identify flags!</li>
-      </ol>
+    <div class="game-mode singleplayer">
+      <div class="mode-header">
+        <div class="mode-icon">
+          <i class="fa fa-user"></i>
+        </div>
+        <h2>Single Player</h2>
+        <p>Practice and improve your flag knowledge solo!</p>
+      </div>
+      
+      <div class="mode-content">
+        <form [formGroup]="createRoomForm" (ngSubmit)="onSubmit()" class="game-form">
+          <div class="form-group">
+          </div>
+          
+          <button type="submit" class="btn-create singleplayer-btn" [disabled]="isLoading || createRoomForm.invalid">
+            <i class="fa fa-play" *ngIf="!isLoading"></i>
+            <i class="fa fa-spinner fa-spin" *ngIf="isLoading"></i>
+            {{ isLoading ? 'Starting Game...' : 'Start Solo Practice' }}
+          </button>
+        </form>
+        
+        <div class="mode-features">
+          <div class="feature">
+            <i class="fa fa-graduation-cap"></i>
+            <span>Learn at your pace</span>
+          </div>
+          <div class="feature">
+            <i class="fa fa-chart-line"></i>
+            <span>Track progress</span>
+          </div>
+          <div class="feature">
+            <i class="fa fa-infinity"></i>
+            <span>Unlimited rounds</span>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <div class="error-message" *ngIf="errorMessage">
+    <i class="fa fa-exclamation-circle"></i>
+    {{ errorMessage }}
   </div>
 
   <nav class="bottom-nav">

@@ -31,6 +31,16 @@ export class CreateRoomComponent implements OnInit {
   createRoomForm: FormGroup;
   isLoading = false;
   errorMessage: string | null = null;
+  
+  continents = [
+    { value: 'AFRICA', label: 'Africa' },
+    { value: 'ASIA', label: 'Asia' },
+    { value: 'EUROPE', label: 'Europe' },
+    { value: 'NORTH_AMERICA', label: 'North America' },
+    { value: 'OCEANIA', label: 'Oceania' },
+    { value: 'SOUTH_AMERICA', label: 'South America' },
+    { value: 'USA_STATE', label: 'USA States' }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -51,7 +61,6 @@ export class CreateRoomComponent implements OnInit {
   onSubmit(): void {
     
     if (!this.authService.isAuthenticated()) {
-      console.error('User not authenticated');
       this.errorMessage = 'Please login to create a room.';
       return;
     }
@@ -70,7 +79,6 @@ export class CreateRoomComponent implements OnInit {
           this.router.navigate(['/room', response.id]);
         },
         error: (error) => {
-          console.error('Error creating room:', error);
           this.isLoading = false;
           
           if (error.status === 401) {
