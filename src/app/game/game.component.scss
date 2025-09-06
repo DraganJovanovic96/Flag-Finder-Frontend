@@ -645,7 +645,7 @@
 
 .rounds-header {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 80px 2fr 1fr 1fr;
   background: rgba(255, 255, 255, 0.1);
   padding: 15px;
   font-weight: 600;
@@ -656,7 +656,7 @@
 
 .round-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 80px 2fr 1fr 1fr;
   padding: 15px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   transition: background-color 0.2s ease;
@@ -671,53 +671,94 @@
   border-bottom: none;
 }
 
-.flag-cell {
+.round-number-cell {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 600;
+  color: #FFD700;
+  font-size: 1.1rem;
+}
+
+.country-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 10px;
+}
+
+.country-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .round-flag {
-  width: 60px;
-  height: 40px;
-  border-radius: 6px;
+  width: 40px;
+  height: 30px;
+  border-radius: 4px;
   object-fit: cover;
   border: 2px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+.country-name {
+  font-weight: 500;
+  color: white;
+  font-size: 1rem;
+}
+
 .guess-cell {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
+  gap: 4px;
+}
+
+.guess-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
 }
 
 .guess-status {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  
+  i {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  &.correct i {
+    color: #4CAF50;
+  }
+  
+  &.incorrect i {
+    color: #f44336;
+  }
 }
 
-.status-indicator {
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 20px;
-  display: inline-block;
-}
-
-.status-indicator.correct {
-  background: rgba(76, 175, 80, 0.2);
-  color: #4CAF50;
-  border: 1px solid #4CAF50;
-}
-
-.status-indicator.incorrect {
-  background: rgba(244, 67, 54, 0.2);
+.guessed-country {
+  font-size: 0.85rem;
   color: #f44336;
-  border: 1px solid #f44336;
+  font-weight: 500;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.no-guess {
+  font-size: 0.8rem;
+  color: #999;
+  font-style: italic;
 }
 
 .final-scores-cards {

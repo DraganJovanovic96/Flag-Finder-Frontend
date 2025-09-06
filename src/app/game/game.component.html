@@ -128,42 +128,60 @@
           <h3 class="rounds-title">Round Results</h3>
           <div class="rounds-table">
             <div class="rounds-header">
-              <div class="flag-column">Flag</div>
+              <div class="round-column">Round</div>
+              <div class="country-column">Country</div>
               <div class="host-guess-column">{{ game.hostName | uppercase }}</div>
               <div class="guest-guess-column">{{ game.guestName | uppercase}}</div>
             </div>
             
-            <div class="round-row" *ngFor="let round of gameRounds">
-              <div class="flag-cell">
-                <img 
-                  [src]="getRoundFlagUrl(round.country.id)" 
-                  [alt]="round.country.nameOfCounty + ' flag'"
-                  class="round-flag"
-                  onerror="this.style.display='none'"
-                />
+            <div class="round-row" *ngFor="let round of gameRounds; let i = index">
+              <div class="round-number-cell">
+                {{ i + 1 }}
               </div>
               
-              <div class="guess-cell">
-                <ng-container *ngFor="let guess of round.guesses">
-                  <div *ngIf="guess.userGameName === game.hostName" class="guess-status">
-                    <span class="status-indicator correct" *ngIf="guess.correct">✓ Correct</span>
-                    <span class="status-indicator incorrect" *ngIf="!guess.correct">✗ Incorrect</span>
-                  </div>
-                </ng-container>
-                <div *ngIf="!hasGuessForPlayer(round, game.hostName)" class="guess-status">
-                  <span class="status-indicator incorrect">✗ No guess</span>
+              <div class="country-cell">
+                <div class="country-info">
+                  <img 
+                    [src]="getRoundFlagUrl(round.country.id)" 
+                    [alt]="round.country.nameOfCounty + ' flag'"
+                    class="round-flag"
+                    onerror="this.style.display='none'"
+                  />
+                  <span class="country-name">{{ round.country.nameOfCounty }}</span>
                 </div>
               </div>
               
               <div class="guess-cell">
                 <ng-container *ngFor="let guess of round.guesses">
-                  <div *ngIf="guess.userGameName === game.guestName" class="guess-status">
-                    <span class="status-indicator correct" *ngIf="guess.correct">✓ Correct</span>
-                    <span class="status-indicator incorrect" *ngIf="!guess.correct">✗ Incorrect</span>
+                  <div *ngIf="guess.userGameName === game.hostName" class="guess-result">
+                    <div class="guess-status" [class.correct]="guess.correct" [class.incorrect]="!guess.correct">
+                      <i class="fa" [class.fa-check]="guess.correct" [class.fa-times]="!guess.correct"></i>
+                    </div>
+                    <div *ngIf="!guess.correct" class="guessed-country">{{ guess.guessedCountryName }}</div>
                   </div>
                 </ng-container>
-                <div *ngIf="!hasGuessForPlayer(round, game.guestName)" class="guess-status">
-                  <span class="status-indicator incorrect">✗ No guess</span>
+                <div *ngIf="!hasGuessForPlayer(round, game.hostName)" class="guess-result">
+                  <div class="guess-status incorrect">
+                    <i class="fa fa-times"></i>
+                  </div>
+                  <div class="no-guess">No guess</div>
+                </div>
+              </div>
+              
+              <div class="guess-cell">
+                <ng-container *ngFor="let guess of round.guesses">
+                  <div *ngIf="guess.userGameName === game.guestName" class="guess-result">
+                    <div class="guess-status" [class.correct]="guess.correct" [class.incorrect]="!guess.correct">
+                      <i class="fa" [class.fa-check]="guess.correct" [class.fa-times]="!guess.correct"></i>
+                    </div>
+                    <div *ngIf="!guess.correct" class="guessed-country">{{ guess.guessedCountryName }}</div>
+                  </div>
+                </ng-container>
+                <div *ngIf="!hasGuessForPlayer(round, game.guestName)" class="guess-result">
+                  <div class="guess-status incorrect">
+                    <i class="fa fa-times"></i>
+                  </div>
+                  <div class="no-guess">No guess</div>
                 </div>
               </div>
             </div>

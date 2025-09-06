@@ -47,37 +47,183 @@
         </div>
       </div>
 
-      <div class="game-card" *ngFor="let game of gameHistory; let i = index">
-        <div class="game-header">
-          <div class="game-info">
-            <div class="game-number">#{{ gameHistory.length - i }}</div>
-            <div class="players">
-              <span class="player" [class.current-user]="isCurrentUser(game.hostUserName)">{{ getDisplayName(game.hostUserName) }}</span>
-              <span class="vs">VS</span>
-              <span class="player" [class.current-user]="isCurrentUser(game.guestUserName)">{{ getDisplayName(game.guestUserName) }}</span>
+      <div class="view-toggle">
+        <button 
+          class="toggle-btn" 
+          [class.active]="!showTableView"
+          (click)="showTableView = false">
+          <i class="fa fa-th"></i>
+          Card View
+        </button>
+        <button 
+          class="toggle-btn" 
+          [class.active]="showTableView"
+          (click)="showTableView = true">
+          <i class="fa fa-table"></i>
+          Table View
+        </button>
+      </div>
+
+      <!-- Card View -->
+      <div *ngIf="!showTableView" class="card-view">
+        <div class="game-card" *ngFor="let game of gameHistory; let i = index">
+          <div class="game-header">
+            <div class="game-info">
+              <div class="game-number">#{{ gameHistory.length - i }}</div>
+              <div class="players">
+                <span class="player current-user">{{ getCurrentUserDisplayName(game) }}</span>
+                <span class="vs">VS</span>
+                <span class="player">{{ getOpponentDisplayName(game) }}</span>
+              </div>
+            </div>
+            <div class="game-result" [class]="getGameResultClass(game)">
+              <div class="result-text">{{ getGameResult(game) }}</div>
+              <div class="score">{{ getUserScore(game) }} - {{ getOpponentScore(game) }}</div>
             </div>
           </div>
-          <div class="game-result" [class]="getGameResultClass(game)">
-            <div class="result-text">{{ getGameResult(game) }}</div>
-            <div class="score">{{ getUserScore(game) }} - {{ getOpponentScore(game) }}</div>
+
+          <div class="rounds-section">
+            <h4>Rounds ({{ game.roundDtos.length }})</h4>
+            <div class="rounds-grid">
+              <div class="round-item" *ngFor="let round of getSortedRounds(game.roundDtos)">
+                <div class="round-header">
+                  <div class="round-number">Round {{ round.roundNumber }}</div>
+                  <div class="round-result" [class.correct]="getCurrentUserGuess(round)?.correct" [class.incorrect]="getCurrentUserGuess(round) && !getCurrentUserGuess(round).correct">
+                    <i class="fa" [class.fa-check]="getCurrentUserGuess(round)?.correct" [class.fa-times]="getCurrentUserGuess(round) && !getCurrentUserGuess(round).correct"></i>
+                  </div>
+                </div>
+                
+                <div class="guess-comparison" *ngIf="getCurrentUserGuess(round)">
+                  <div class="guess-section">
+                    <div class="section-title">Your Guess</div>
+                    <div class="flag-container">
+                      <img 
+                        [src]="getFlagUrl(getCurrentUserGuess(round).guessedCountryId)" 
+                        [alt]="getCurrentUserGuess(round).guessedCountryName + ' flag'"
+                        class="round-flag"
+                        onerror="this.style.display='none'"
+                      />
+                    </div>
+                    <div class="country-name">{{ getCurrentUserGuess(round).guessedCountryName }}</div>
+                  </div>
+                  
+                  <div class="vs-divider">
+                    <i class="fa fa-arrow-right"></i>
+                  </div>
+                  
+                  <div class="correct-section">
+                    <div class="section-title">Correct Answer</div>
+                    <div class="flag-container">
+                      <img 
+                        [src]="getFlagUrl(round.countryId)" 
+                        [alt]="round.countryName + ' flag'"
+                        class="round-flag"
+                        onerror="this.style.display='none'"
+                      />
+                    </div>
+                    <div class="country-name">{{ round.countryName }}</div>
+                  </div>
+                </div>
+                
+                <div class="no-guess" *ngIf="!getCurrentUserGuess(round)">
+                  <div class="flag-container">
+                    <img 
+                      [src]="getFlagUrl(round.countryId)" 
+                      [alt]="round.countryName + ' flag'"
+                      class="round-flag"
+                      onerror="this.style.display='none'"
+                    />
+                  </div>
+                  <div class="country-name">{{ round.countryName }}</div>
+                  <div class="no-guess-text">No guess made</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div class="rounds-section">
-          <h4>Rounds ({{ game.roundDtos.length }})</h4>
-          <div class="rounds-grid">
-            <div class="round-item" *ngFor="let round of getSortedRounds(game.roundDtos)">
-              <div class="round-number">{{ round.roundNumber }}</div>
-              <div class="flag-container">
-                <img 
-                  [src]="getFlagUrl(round.countryId)" 
-                  [alt]="round.countryName + ' flag'"
-                  class="round-flag"
-                  onerror="this.style.display='none'"
-                />
+      <!-- Table View -->
+      <div *ngIf="showTableView" class="table-view">
+        <div class="game-table" *ngFor="let game of gameHistory; let i = index">
+          <div class="game-table-header">
+            <div class="game-info">
+              <h3>Game #{{ gameHistory.length - i }}</h3>
+              <div class="players-info">
+                <span class="player current-user">{{ getCurrentUserDisplayName(game) }}</span>
+                <span class="vs">VS</span>
+                <span class="player">{{ getOpponentDisplayName(game) }}</span>
               </div>
-              <div class="country-name">{{ round.countryName }}</div>
             </div>
+            <div class="final-score">
+              <div class="score-display" [class]="getGameResultClass(game)">
+                {{ getUserScore(game) }} - {{ getOpponentScore(game) }}
+                <span class="result">{{ getGameResult(game) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounds-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Round</th>
+                  <th>Country</th>
+                  <th class="current-user-header">{{ getCurrentUserDisplayName(game) }}</th>
+                  <th>{{ getOpponentDisplayName(game) }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let round of getSortedRounds(game.roundDtos)">
+                  <td class="round-number">{{ round.roundNumber }}</td>
+                  <td class="country-cell">
+                    <div class="country-info">
+                      <img 
+                        [src]="getFlagUrl(round.countryId)" 
+                        [alt]="round.countryName + ' flag'"
+                        class="table-flag"
+                        onerror="this.style.display='none'"
+                      />
+                      <span class="country-name">{{ round.countryName }}</span>
+                    </div>
+                  </td>
+                  <td class="player-guess current-user-cell">
+                    <div class="guess-result">
+                      <div *ngIf="getCurrentUserGuess(round); else noCurrentUserGuess" class="guess-info" 
+                           [class.correct]="getCurrentUserGuess(round).correct" 
+                           [class.incorrect]="!getCurrentUserGuess(round).correct">
+                        <i class="fa" 
+                           [class.fa-check]="getCurrentUserGuess(round).correct" 
+                           [class.fa-times]="!getCurrentUserGuess(round).correct"></i>
+                        <span *ngIf="!getCurrentUserGuess(round).correct" class="guessed-country">
+                          {{ getCurrentUserGuess(round).guessedCountryName }}
+                        </span>
+                      </div>
+                      <ng-template #noCurrentUserGuess>
+                        <span class="no-guess">-</span>
+                      </ng-template>
+                    </div>
+                  </td>
+                  <td class="player-guess">
+                    <div class="guess-result">
+                      <div *ngIf="getOpponentGuess(round, game); else noOpponentGuess" class="guess-info" 
+                           [class.correct]="getOpponentGuess(round, game).correct" 
+                           [class.incorrect]="!getOpponentGuess(round, game).correct">
+                        <i class="fa" 
+                           [class.fa-check]="getOpponentGuess(round, game).correct" 
+                           [class.fa-times]="!getOpponentGuess(round, game).correct"></i>
+                        <span *ngIf="!getOpponentGuess(round, game).correct" class="guessed-country">
+                          {{ getOpponentGuess(round, game).guessedCountryName }}
+                        </span>
+                      </div>
+                      <ng-template #noOpponentGuess>
+                        <span class="no-guess">-</span>
+                      </ng-template>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

@@ -144,6 +144,30 @@ export class ProfileComponent implements OnInit {
     return rounds.sort((a, b) => a.roundNumber - b.roundNumber);
   }
 
+  getCurrentUserGuess(round: any): any {
+    const currentUserGameName = this.emailToGameNameMap.get(this.currentUserEmail);
+    return round.guesses?.find((guess: any) => guess.userGameName === currentUserGameName);
+  }
+
+  getOpponentGuess(round: any, game: any): any {
+    const opponentName = this.getOpponentName(game);
+    return round.guesses?.find((guess: any) => guess.userGameName === opponentName);
+  }
+
+  getHostGuess(round: any, game: any): any {
+    return round.guesses?.find((guess: any) => guess.userGameName === game.hostUserName);
+  }
+
+  getGuestGuess(round: any, game: any): any {
+    return round.guesses?.find((guess: any) => guess.userGameName === game.guestUserName);
+  }
+
+  showTableView = false;
+
+  toggleView(): void {
+    this.showTableView = !this.showTableView;
+  }
+
   getFlagUrl(countryId: string): string {
     return `${BASIC_URL}countries/${countryId}/flag`;
   }
@@ -162,5 +186,14 @@ export class ProfileComponent implements OnInit {
 
   getDrawGamesCount(): number {
     return this.gameHistory.filter(game => this.getGameResult(game) === 'Draw').length;
+  }
+
+  getCurrentUserDisplayName(game: GameHistoryDto): string {
+    const currentUserGameName = this.emailToGameNameMap.get(this.currentUserEmail);
+    return this.getDisplayName(currentUserGameName || '');
+  }
+
+  getOpponentDisplayName(game: GameHistoryDto): string {
+    return this.getOpponentName(game);
   }
 }

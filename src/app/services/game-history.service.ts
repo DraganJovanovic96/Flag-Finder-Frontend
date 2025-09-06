@@ -5,6 +5,13 @@ import { environment } from '../../environments/environment';
 
 const BASIC_URL = environment.apiUrl;
 
+export interface GuessDto {
+  userGameName: string;
+  guessedCountryName: string;
+  guessedCountryId: string;
+  correct: boolean;
+}
+
 export interface RoundDto {
   id: string;
   roundNumber: number;
@@ -13,6 +20,7 @@ export interface RoundDto {
   flagImage: string;
   timeRemaining: number | null;
   roundActive: boolean;
+  guesses: GuessDto[];
 }
 
 export interface GameHistoryDto {
