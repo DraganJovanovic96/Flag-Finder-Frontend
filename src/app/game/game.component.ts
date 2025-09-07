@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -77,6 +77,8 @@ export class GameComponent implements OnInit, OnDestroy {
   gameRounds: any[] = [];
   singlePlayerRounds: any[] = [];
 
+  @ViewChild('guessInput') guessInput!: ElementRef<HTMLInputElement>;
+
   constructor(
     public router: Router,
     private route: ActivatedRoute,
@@ -106,6 +108,7 @@ export class GameComponent implements OnInit, OnDestroy {
               this.userGuess = '';
               this.guessMessage = '';
               this.cdr.detectChanges();
+              this.focusGuessInput();
             }
           });
         },
@@ -171,6 +174,7 @@ export class GameComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.startGameStatePolling();
           this.startRoundTimer();
+          this.focusGuessInput();
         },
         error: (error) => {
           if (error.status === 404) {
@@ -200,6 +204,7 @@ export class GameComponent implements OnInit, OnDestroy {
         this.isLoading = false;
         this.startGameStatePolling();
         this.startRoundTimer();
+        this.focusGuessInput();
       },
       error => {
         this.errorMessage = error.error?.message || 'Failed to start game';
@@ -240,6 +245,7 @@ export class GameComponent implements OnInit, OnDestroy {
           this.startRoundTimer();
           this.userGuess = '';
           this.guessMessage = '';
+          this.focusGuessInput();
         } else {
           // Update timer even if same round (in case backend time is more accurate)
           const newTimeRemaining = roundData?.timeRemaining || 0;
@@ -252,6 +258,15 @@ export class GameComponent implements OnInit, OnDestroy {
         
         if (response.status === 'COMPLETED') {
           this.handleGameEnd();
+        }
+        
+        // Additional check: if we've reached the final round and it's not active, the game should be completed
+        if (response.currentRound >= response.totalRounds) {
+          const roundData = response.currentRoundData || response.currentSinglePlayerRoundData;
+          if (!roundData?.roundActive && response.status !== 'COMPLETED') {
+            console.log('Final round completed but game status not updated, forcing game end');
+            this.handleGameEnd();
+          }
         }
       },
       error => {
@@ -280,6 +295,15 @@ export class GameComponent implements OnInit, OnDestroy {
         clearInterval(this.roundTimerInterval);
         this.roundTimerInterval = null;
         console.log('Round timer expired');
+        
+        // Check if this was the final round
+        if (this.game && this.game.currentRound >= this.game.totalRounds) {
+          console.log('Final round timer expired, checking for game completion...');
+          // Give a small delay to allow backend to process, then check game state
+          setTimeout(() => {
+            this.fetchGameState();
+          }, 2000);
+        }
       }
     }, 1000);
   }
@@ -415,6 +439,12 @@ export class GameComponent implements OnInit, OnDestroy {
     if (this.gameStateInterval) {
       this.gameStateInterval.unsubscribe();
       this.gameStateInterval = null;
+    }
+    
+    // Ensure game status is set to COMPLETED for UI display
+    if (this.game && this.game.status !== 'COMPLETED') {
+      console.log('Forcing game status to COMPLETED for end screen display');
+      this.game.status = 'COMPLETED';
     }
     
     // Fetch rounds for both single player and multiplayer games
@@ -640,5 +670,13 @@ export class GameComponent implements OnInit, OnDestroy {
         }]
       });
     }
+  }
+
+  focusGuessInput(): void {
+    setTimeout(() => {
+      if (this.guessInput && this.guessInput.nativeElement) {
+        this.guessInput.nativeElement.focus();
+      }
+    }, 100);
   }
 }

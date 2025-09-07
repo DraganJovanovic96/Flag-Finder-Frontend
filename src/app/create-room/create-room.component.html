@@ -54,12 +54,15 @@
       </div>
       
       <div class="mode-content">
-        <div class="game-form">
-          <button type="button" class="btn-create singleplayer-btn" (click)="startSoloPractice()">
+        <form class="game-form" (ngSubmit)="startSoloPractice()">
+          <div class="form-group">
+          </div>
+          
+          <button type="submit" class="btn-create singleplayer-btn">
             <i class="fa fa-play"></i>
             Start Solo Practice
           </button>
-        </div>
+        </form>
         
         <div class="mode-features">
           <div class="feature">

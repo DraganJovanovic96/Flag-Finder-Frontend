@@ -272,9 +272,15 @@
 .flag-image {
   max-width: 300px;
   max-height: 200px;
+  min-width: 200px;
+  min-height: 133px;
+  width: auto;
+  height: auto;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .flag-image:hover {
@@ -856,22 +862,82 @@
 @media (max-width: 700px) {
   .rounds-table {
     font-size: 0.9rem;
+    max-width: 100%;
+    overflow-x: auto;
   }
   
   .rounds-header,
   .round-row {
-    grid-template-columns: 1fr 1fr 1fr;
-    padding: 10px;
+    grid-template-columns: 40px 100px 80px 80px;
+    padding: 8px 3px;
+    min-width: 300px;
+  }
+  
+  .rounds-header {
+    font-size: 0.8rem;
+  }
+  
+  .host-guess-column,
+  .guest-guess-column {
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0 2px;
+  }
+  
+  .round-number-cell {
+    font-size: 0.85rem;
+  }
+  
+  .country-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-width: 100px;
+    max-width: 100px;
+    gap: 4px;
+  }
+  
+  .country-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .country-name {
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90px;
+    text-align: center;
+    line-height: 1.1;
   }
   
   .round-flag {
-    width: 40px;
-    height: 27px;
+    width: 30px;
+    height: 20px;
   }
   
-  .status-indicator {
+  .guess-cell {
     font-size: 0.8rem;
-    padding: 6px 10px;
+  }
+  
+  .guess-status i {
+    font-size: 1rem;
+  }
+  
+  .guessed-country {
+    font-size: 0.7rem;
+    max-width: 70px;
+  }
+  
+  .no-guess {
+    font-size: 0.7rem;
   }
   
   .final-scores-cards {
