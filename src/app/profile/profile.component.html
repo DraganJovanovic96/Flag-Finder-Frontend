@@ -34,8 +34,8 @@
     <div *ngIf="gameHistory.length > 0" class="games-list">
       <div class="stats-summary">
         <div class="stat-card">
-          <div class="stat-number">{{ gameHistory.length }}</div>
-          <div class="stat-label">Games Played</div>
+          <div class="stat-number">{{ totalElements }}</div>
+          <div class="stat-label">Total Games</div>
         </div>
         <div class="stat-card">
           <div class="stat-number">{{ getWonGamesCount() }}</div>
@@ -46,6 +46,7 @@
           <div class="stat-label">Draws</div>
         </div>
       </div>
+
 
       <div class="view-toggle">
         <button 
@@ -69,7 +70,7 @@
         <div class="game-card" *ngFor="let game of gameHistory; let i = index">
           <div class="game-header">
             <div class="game-info">
-              <div class="game-number">#{{ gameHistory.length - i }}</div>
+              <div class="game-number">#{{ getGameNumber(i) }}</div>
               <div class="players">
                 <span class="player current-user">{{ getCurrentUserDisplayName(game) }}</span>
                 <span class="vs">VS</span>
@@ -148,7 +149,7 @@
         <div class="game-table" *ngFor="let game of gameHistory; let i = index">
           <div class="game-table-header">
             <div class="game-info">
-              <h3>Game #{{ gameHistory.length - i }}</h3>
+              <h3>Game #{{ getGameNumber(i) }}</h3>
               <div class="players-info">
                 <span class="player current-user">{{ getCurrentUserDisplayName(game) }}</span>
                 <span class="vs">VS</span>
@@ -225,6 +226,54 @@
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <!-- Pagination Controls at Bottom -->
+      <div class="pagination-container" *ngIf="totalPages > 1">
+        <div class="pagination-info">
+          <span>Page {{ currentPage + 1 }} of {{ totalPages }} ({{ totalElements }} total games)</span>
+        </div>
+        <div class="pagination-controls">
+          <button 
+            class="pagination-btn" 
+            [disabled]="isFirstPage" 
+            (click)="goToFirstPage()"
+            title="First page">
+            <i class="fa fa-angle-double-left"></i>
+          </button>
+          <button 
+            class="pagination-btn" 
+            [disabled]="isFirstPage" 
+            (click)="goToPreviousPage()"
+            title="Previous page">
+            <i class="fa fa-angle-left"></i>
+          </button>
+          
+          <div class="page-numbers">
+            <button 
+              *ngFor="let page of getPageNumbers()" 
+              class="page-number-btn"
+              [class.active]="page === currentPage"
+              (click)="goToPage(page)">
+              {{ page + 1 }}
+            </button>
+          </div>
+          
+          <button 
+            class="pagination-btn" 
+            [disabled]="isLastPage" 
+            (click)="goToNextPage()"
+            title="Next page">
+            <i class="fa fa-angle-right"></i>
+          </button>
+          <button 
+            class="pagination-btn" 
+            [disabled]="isLastPage" 
+            (click)="goToLastPage()"
+            title="Last page">
+            <i class="fa fa-angle-double-right"></i>
+          </button>
         </div>
       </div>
     </div>

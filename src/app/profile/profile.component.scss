@@ -202,6 +202,7 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  margin-bottom: 2rem;
 }
 
 .game-card {
@@ -210,10 +211,15 @@
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  margin-bottom: 2rem;
 
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
   }
 }
 
@@ -949,6 +955,121 @@
     .nav-btn {
       width: 100%;
       padding: 0.875rem 1rem;
+    }
+  }
+}
+
+.pagination-container {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  clear: both;
+
+  .pagination-info {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    .pagination-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: 2px solid #e1e5e9;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #666;
+
+      &:hover:not(:disabled) {
+        border-color: #667eea;
+        color: #667eea;
+        transform: translateY(-1px);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      i {
+        font-size: 1rem;
+      }
+    }
+
+    .page-numbers {
+      display: flex;
+      gap: 0.25rem;
+      margin: 0 0.5rem;
+
+      .page-number-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 2px solid #e1e5e9;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #666;
+        font-weight: 500;
+        font-size: 0.9rem;
+
+        &:hover {
+          border-color: #667eea;
+          color: #667eea;
+          transform: translateY(-1px);
+        }
+
+        &.active {
+          background: #667eea;
+          border-color: #667eea;
+          color: white;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+
+    .pagination-controls {
+      gap: 0.25rem;
+
+      .pagination-btn {
+        width: 36px;
+        height: 36px;
+      }
+
+      .page-numbers .page-number-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 0.8rem;
+      }
+    }
+
+    .pagination-info {
+      font-size: 0.8rem;
     }
   }
 }

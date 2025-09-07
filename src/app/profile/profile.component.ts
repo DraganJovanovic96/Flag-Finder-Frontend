@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { GameHistoryService, GameHistoryDto } from '../services/game-history.service';
+import { GameHistoryService, GameHistoryDto, PagedGameHistoryResponse } from '../services/game-history.service';
 import { AuthService } from '../services/auth/auth.service';
 import { UserProfileService } from '../services/user-profile.service';
 import { environment } from '../../environments/environment';
@@ -23,6 +23,16 @@ export class ProfileComponent implements OnInit {
   currentUsername = '';
   currentUserEmail = '';
   emailToGameNameMap = new Map<string, string>();
+  
+  currentPage = 0;
+  pageSize = 5;
+  totalElements = 0;
+  totalPages = 0;
+  isFirstPage = true;
+  isLastPage = true;
+
+  totalWonGames = 0;
+  totalDrawGames = 0;
 
   constructor(
     private gameHistoryService: GameHistoryService,
@@ -38,17 +48,42 @@ export class ProfileComponent implements OnInit {
     }
 
     this.currentUserEmail = this.userProfileService.getCurrentUserEmail();
+    this.loadOverallStatistics();
     this.loadGameHistory();
+  }
+
+  loadOverallStatistics(): void {
+    this.gameHistoryService.getWonGamesCount().subscribe({
+      next: (count) => {
+        this.totalWonGames = count;
+      },
+      error: (error) => {
+        console.error('Failed to load won games count:', error);
+      }
+    });
+
+    this.gameHistoryService.getDrawGamesCount().subscribe({
+      next: (count) => {
+        this.totalDrawGames = count;
+      },
+      error: (error) => {
+        console.error('Failed to load draw games count:', error);
+      }
+    });
   }
 
   loadGameHistory(): void {
     this.isLoading = true;
     this.errorMessage = null;
 
-    this.gameHistoryService.getUserGameHistory().subscribe({
-      next: (history) => {
-        this.gameHistory = history;
-        this.loadUserProfiles(history);
+    this.gameHistoryService.getUserGameHistoryPaginated(this.currentPage, this.pageSize).subscribe({
+      next: (response: PagedGameHistoryResponse) => {
+        this.gameHistory = response.content;
+        this.totalElements = response.totalElements;
+        this.totalPages = response.totalPages;
+        this.isFirstPage = response.first;
+        this.isLastPage = response.last;
+        this.loadUserProfiles(response.content);
       },
       error: (error) => {
         this.errorMessage = 'Failed to load game history. Please try again.';
@@ -181,11 +216,11 @@ export class ProfileComponent implements OnInit {
   }
 
   getWonGamesCount(): number {
-    return this.gameHistory.filter(game => this.getGameResult(game) === 'Won').length;
+    return this.totalWonGames;
   }
 
   getDrawGamesCount(): number {
-    return this.gameHistory.filter(game => this.getGameResult(game) === 'Draw').length;
+    return this.totalDrawGames;
   }
 
   getCurrentUserDisplayName(game: GameHistoryDto): string {
@@ -195,5 +230,55 @@ export class ProfileComponent implements OnInit {
 
   getOpponentDisplayName(game: GameHistoryDto): string {
     return this.getOpponentName(game);
+  }
+
+  goToFirstPage(): void {
+    if (!this.isFirstPage) {
+      this.currentPage = 0;
+      this.loadGameHistory();
+    }
+  }
+
+  goToPreviousPage(): void {
+    if (!this.isFirstPage) {
+      this.currentPage--;
+      this.loadGameHistory();
+    }
+  }
+
+  goToNextPage(): void {
+    if (!this.isLastPage) {
+      this.currentPage++;
+      this.loadGameHistory();
+    }
+  }
+
+  goToLastPage(): void {
+    if (!this.isLastPage) {
+      this.currentPage = this.totalPages - 1;
+      this.loadGameHistory();
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages && page !== this.currentPage) {
+      this.currentPage = page;
+      this.loadGameHistory();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const startPage = Math.max(0, this.currentPage - 2);
+    const endPage = Math.min(this.totalPages - 1, this.currentPage + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  getGameNumber(index: number): number {
+    return this.totalElements - (this.currentPage * this.pageSize) - index;
   }
 }

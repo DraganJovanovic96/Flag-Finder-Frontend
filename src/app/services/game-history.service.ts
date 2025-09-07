@@ -33,6 +33,18 @@ export interface GameHistoryDto {
   roundDtos: RoundDto[];
 }
 
+export interface PagedGameHistoryResponse {
+  content: GameHistoryDto[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -46,5 +58,29 @@ export class GameHistoryService {
       .set('Accept', '*/*');
 
     return this.http.get<GameHistoryDto[]>(`${BASIC_URL}games/user/game-history`, { headers });
+  }
+
+  getUserGameHistoryPaginated(page: number = 0, pageSize: number = 5): Observable<PagedGameHistoryResponse> {
+    const headers = new HttpHeaders()
+      .set('Content-Type', 'application/json')
+      .set('Accept', '*/*');
+
+    return this.http.get<PagedGameHistoryResponse>(`${BASIC_URL}games/user/game-history/paginated?page=${page}&pageSize=${pageSize}`, { headers });
+  }
+
+  getWonGamesCount(): Observable<number> {
+    const headers = new HttpHeaders()
+      .set('Content-Type', 'application/json')
+      .set('Accept', '*/*');
+
+    return this.http.get<number>(`${BASIC_URL}games/user/won-games-count`, { headers });
+  }
+
+  getDrawGamesCount(): Observable<number> {
+    const headers = new HttpHeaders()
+      .set('Content-Type', 'application/json')
+      .set('Accept', '*/*');
+
+    return this.http.get<number>(`${BASIC_URL}games/user/draw-games-count`, { headers });
   }
 }
