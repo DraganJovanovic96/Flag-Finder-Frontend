@@ -12,14 +12,24 @@ const BASIC_URL = environment.apiUrl;
 
 interface Game {
   id: string;
-  hostName: string;
-  guestName: string;
+  hostName?: string;
+  guestName?: string;
+  playerName?: string;
   hostScore: number;
-  guestScore: number;
+  guestScore?: number;
   totalRounds: number;
   currentRound: number;
   status: string;
-  currentRoundData: {
+  currentRoundData?: {
+    id: string;
+    roundNumber: number;
+    countryName: string;
+    countryId: string;
+    flagImage: number[];
+    timeRemaining: number;
+    roundActive: boolean;
+  };
+  currentSinglePlayerRoundData?: {
     id: string;
     roundNumber: number;
     countryName: string;
@@ -65,6 +75,7 @@ export class GameComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   
   gameRounds: any[] = [];
+  singlePlayerRounds: any[] = [];
 
   constructor(
     public router: Router,
@@ -155,7 +166,8 @@ export class GameComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response: Game) => {
           this.game = response;
-          this.roundTimeRemaining = response.currentRoundData?.timeRemaining || 0;
+          const roundData = response.currentRoundData || response.currentSinglePlayerRoundData;
+          this.roundTimeRemaining = roundData?.timeRemaining || 0;
           this.isLoading = false;
           this.startGameStatePolling();
           this.startRoundTimer();
@@ -183,7 +195,8 @@ export class GameComponent implements OnInit, OnDestroy {
     this.http.post<Game>(`${BASIC_URL}games/start`, startGameRequest, { headers })
       .subscribe((response: Game) => {
         this.game = response;
-        this.roundTimeRemaining = response.currentRoundData?.timeRemaining || 0;
+        const roundData = response.currentRoundData || response.currentSinglePlayerRoundData;
+        this.roundTimeRemaining = roundData?.timeRemaining || 0;
         this.isLoading = false;
         this.startGameStatePolling();
         this.startRoundTimer();
@@ -214,11 +227,27 @@ export class GameComponent implements OnInit, OnDestroy {
         const oldRound = this.game?.currentRound;
         this.game = response;
         
+        const roundData = response.currentRoundData || response.currentSinglePlayerRoundData;
+        
         if (oldRound !== response.currentRound) {
-          this.roundTimeRemaining = response.currentRoundData?.timeRemaining || 0;
+          // Store the previous round data for single player
+          if (this.game?.playerName && oldRound && oldRound > 0) {
+            // Store previous round data - implementation needed
+          }
+          
+          this.roundTimeRemaining = roundData?.timeRemaining || 0;
+          console.log('New round detected:', response.currentRound, 'Time remaining:', this.roundTimeRemaining);
           this.startRoundTimer();
           this.userGuess = '';
           this.guessMessage = '';
+        } else {
+          // Update timer even if same round (in case backend time is more accurate)
+          const newTimeRemaining = roundData?.timeRemaining || 0;
+          if (Math.abs(this.roundTimeRemaining - newTimeRemaining) > 2) {
+            console.log('Syncing timer with backend:', this.roundTimeRemaining, '->', newTimeRemaining);
+            this.roundTimeRemaining = newTimeRemaining;
+            this.startRoundTimer();
+          }
         }
         
         if (response.status === 'COMPLETED') {
@@ -235,9 +264,14 @@ export class GameComponent implements OnInit, OnDestroy {
       this.roundTimerInterval = null;
     }
     
-    if (!this.game?.currentRoundData?.roundActive) return;
+    const roundData = this.game?.currentRoundData || this.game?.currentSinglePlayerRoundData;
+    if (!roundData?.roundActive) {
+      console.log('Round not active, not starting timer. RoundData:', roundData);
+      return;
+    }
     
-    this.roundTimeRemaining = this.game.currentRoundData.timeRemaining;
+    this.roundTimeRemaining = roundData.timeRemaining;
+    console.log('Starting timer with time:', this.roundTimeRemaining, 'Round active:', roundData.roundActive);
     
     this.roundTimerInterval = setInterval(() => {
       this.roundTimeRemaining--;
@@ -245,6 +279,7 @@ export class GameComponent implements OnInit, OnDestroy {
       if (this.roundTimeRemaining <= 0) {
         clearInterval(this.roundTimerInterval);
         this.roundTimerInterval = null;
+        console.log('Round timer expired');
       }
     }, 1000);
   }
@@ -280,7 +315,7 @@ export class GameComponent implements OnInit, OnDestroy {
                 let isHost = true;
                 if (prevGame) {
                   const hostIncreased = response.game.hostScore > prevGame.hostScore;
-                  const guestIncreased = response.game.guestScore > prevGame.guestScore;
+                  const guestIncreased = response.game.guestScore > (prevGame.guestScore || 0);
                   if (hostIncreased && !guestIncreased) {
                     isHost = true;
                   } else if (!hostIncreased && guestIncreased) {
@@ -382,6 +417,7 @@ export class GameComponent implements OnInit, OnDestroy {
       this.gameStateInterval = null;
     }
     
+    // Fetch rounds for both single player and multiplayer games
     if (this.game?.id) {
       this.fetchGameRounds();
     }
@@ -390,7 +426,8 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   getFlagImageSrc(): string {
-    const currentCountryId = this.game?.currentRoundData?.countryId;
+    const roundData = this.game?.currentRoundData || this.game?.currentSinglePlayerRoundData;
+    const currentCountryId = roundData?.countryId;
     
     if (!currentCountryId) {
       this.cachedFlagUrl = '';
@@ -426,10 +463,10 @@ export class GameComponent implements OnInit, OnDestroy {
   getWinnerMessage(): string {
     if (!this.game || this.game.status !== 'COMPLETED') return '';
     
-    if (this.game.hostScore > this.game.guestScore) {
-      return `${this.game.hostName.toUpperCase()} WINS!`;
-    } else if (this.game.guestScore > this.game.hostScore) {
-      return `${this.game.guestName.toUpperCase()} WINS!`;
+    if (this.game.hostScore > (this.game.guestScore || 0)) {
+      return `${this.game.hostName?.toUpperCase()} WINS!`;
+    } else if ((this.game.guestScore || 0) > this.game.hostScore) {
+      return `${this.game.guestName?.toUpperCase()} WINS!`;
     } else {
       return "It's a tie!";
     }
@@ -530,15 +567,78 @@ export class GameComponent implements OnInit, OnDestroy {
     this.http.get<any[]>(`${BASIC_URL}games/${this.game.id}/rounds`, { headers })
       .subscribe({
         next: (rounds) => {
-          this.gameRounds = rounds;
+          if (this.game?.playerName) {
+            // Single player - use the fetched data for singlePlayerRounds
+            this.singlePlayerRounds = rounds;
+          } else {
+            // Multiplayer - use gameRounds as before
+            this.gameRounds = rounds;
+          }
+          console.log('Fetched rounds:', rounds);
           this.cdr.detectChanges();
         },
         error: (error) => {
+          console.log('Error fetching rounds:', error);
+          // Set empty arrays on error
+          if (this.game?.playerName) {
+            this.singlePlayerRounds = [];
+          } else {
+            this.gameRounds = [];
+          }
+          this.cdr.detectChanges();
         }
       });
   }
 
+
   hasGuessForPlayer(round: any, playerName: string): boolean {
     return round.guesses && round.guesses.some((guess: any) => guess.userGameName === playerName);
+  }
+
+  getSinglePlayerGameName(): string {
+    // Get the game name from the first guess in the rounds data (for end screen)
+    if (this.singlePlayerRounds && this.singlePlayerRounds.length > 0) {
+      for (const round of this.singlePlayerRounds) {
+        if (round.guesses && round.guesses.length > 0) {
+          return round.guesses[0].userGameName;
+        }
+      }
+    }
+    // During gameplay, use hostName from backend (like multiplayer does)
+    return this.game?.hostName || '';
+  }
+
+  getSinglePlayerEndMessage(): string {
+    const score = this.game?.hostScore || 0;
+    if (score === 0) {
+      return 'Better luck next time! You scored 0 points.';
+    } else if (score === 1) {
+      return 'Not bad! You scored 1 point!';
+    } else if (score <= 2) {
+      return `Good effort! You scored ${score} points!`;
+    } else {
+      return `Great job! You scored ${score} points!`;
+    }
+  }
+
+  buildSinglePlayerRoundsData(): void {
+    // Create mock rounds data for single player based on game info
+    if (!this.game?.playerName || !this.game?.totalRounds) return;
+    
+    this.singlePlayerRounds = [];
+    for (let i = 1; i <= this.game.totalRounds; i++) {
+      this.singlePlayerRounds.push({
+        roundNumber: i,
+        country: {
+          id: `country-${i}`,
+          nameOfCounty: `Round ${i} Country`
+        },
+        guesses: [{
+          userGameName: this.game.playerName,
+          correct: Math.random() > 0.5, // Random for now
+          guessedCountryName: `Guessed Country ${i}`
+        }]
+      });
+    }
   }
 }

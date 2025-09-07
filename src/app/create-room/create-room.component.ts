@@ -104,6 +104,10 @@ export class CreateRoomComponent implements OnInit {
     this.router.navigate(['/profile']);
   }
 
+  startSoloPractice(): void {
+    this.router.navigate(['/single-player']);
+  }
+
   logout(): void {
     this.authService.logout();
   }
