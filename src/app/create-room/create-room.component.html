@@ -54,15 +54,15 @@
       </div>
       
       <div class="mode-content">
-        <form class="game-form" (ngSubmit)="startSoloPractice()">
+        <div class="game-form">
           <div class="form-group">
           </div>
           
-          <button type="submit" class="btn-create singleplayer-btn">
+          <button type="button" class="btn-create singleplayer-btn" (click)="startSoloPractice()">
             <i class="fa fa-play"></i>
             Start Solo Practice
           </button>
-        </form>
+        </div>
         
         <div class="mode-features">
           <div class="feature">
@@ -88,10 +88,6 @@
   </div>
 
   <nav class="bottom-nav">
-    <button class="nav-btn" (click)="goToBrowseRooms()">
-      <i class="fa fa-search"></i>
-      Browse Rooms
-    </button>
     <button class="nav-btn" (click)="goToProfile()">
       <i class="fa fa-user"></i>
       Profile

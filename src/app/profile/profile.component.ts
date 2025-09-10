@@ -225,7 +225,9 @@ export class ProfileComponent implements OnInit {
 
   getCurrentUserDisplayName(game: GameHistoryDto): string {
     const currentUserGameName = this.emailToGameNameMap.get(this.currentUserEmail);
-    return this.getDisplayName(currentUserGameName || '');
+    const result = this.getDisplayName(currentUserGameName || '');
+    
+    return result;
   }
 
   getOpponentDisplayName(game: GameHistoryDto): string {
@@ -280,5 +282,33 @@ export class ProfileComponent implements OnInit {
 
   getGameNumber(index: number): number {
     return this.totalElements - (this.currentPage * this.pageSize) - index;
+  }
+
+  formatGameTime(startedAt: string): string {
+    if (!startedAt) {
+      return 'Time unknown';
+    }
+  
+    const start = new Date(startedAt);
+  
+    return start.toLocaleString('sr-RS', {
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false, 
+    });
+  }
+
+  isWinner(game: GameHistoryDto, playerName: string): boolean {
+    if (!playerName || playerName.trim() === '' || !game.winnerUserName) {
+      return false;
+    }
+    
+    const winnerDisplayName = this.getDisplayName(game.winnerUserName);
+    const result = winnerDisplayName === playerName;
+    
+    return result;
   }
 }

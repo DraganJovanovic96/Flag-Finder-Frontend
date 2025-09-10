@@ -1,6 +1,12 @@
 <div class="profile-container">
   <header class="page-header">
-    <h1>🏆 Game History</h1>
+    <div class="header-top">
+      <button class="back-btn" (click)="goBack()" title="Go back">
+        <i class="fa fa-arrow-left"></i>
+      </button>
+      <h1 class="clickable-title" (click)="goBack()">🏆 Game History</h1>
+      <div class="header-spacer"></div>
+    </div>
     <p>Your FlagFinder journey and achievements</p>
   </header>
 
@@ -72,9 +78,13 @@
             <div class="game-info">
               <div class="game-number">#{{ getGameNumber(i) }}</div>
               <div class="players">
-                <span class="player current-user">{{ getCurrentUserDisplayName(game) }}</span>
+                <span class="player" [class.winner]="isWinner(game, getCurrentUserDisplayName(game))">{{ getCurrentUserDisplayName(game) }}</span>
                 <span class="vs">VS</span>
-                <span class="player">{{ getOpponentDisplayName(game) }}</span>
+                <span class="player" [class.winner]="isWinner(game, getOpponentDisplayName(game))">{{ getOpponentDisplayName(game) }}</span>
+              </div>
+              <div class="game-time" *ngIf="game.startedAt">
+                <i class="fa fa-clock"></i>
+                {{ formatGameTime(game.startedAt) }}
               </div>
             </div>
             <div class="game-result" [class]="getGameResultClass(game)">
@@ -151,9 +161,13 @@
             <div class="game-info">
               <h3>Game #{{ getGameNumber(i) }}</h3>
               <div class="players-info">
-                <span class="player current-user">{{ getCurrentUserDisplayName(game) }}</span>
-                <span class="vs">VS</span>
-                <span class="player">{{ getOpponentDisplayName(game) }}</span>
+                <span class="player" [class.winner]="isWinner(game, getCurrentUserDisplayName(game))">{{ getCurrentUserDisplayName(game) }}</span>
+                <span class="vs"> VS </span>
+                <span class="player" [class.winner]="isWinner(game, getOpponentDisplayName(game))">{{ getOpponentDisplayName(game) }}</span>
+              </div>
+              <div class="game-time" *ngIf="game.startedAt">
+                <i class="fa fa-clock"></i>
+                {{ formatGameTime(game.startedAt) }}
               </div>
             </div>
             <div class="final-score">

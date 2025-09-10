@@ -14,12 +14,57 @@
   color: white;
   margin-bottom: 3rem;
 
-  h1 {
-    font-size: 3rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    letter-spacing: -0.02em;
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: white;
+      padding: 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+      }
+
+      i {
+        font-size: 1.2rem;
+      }
+    }
+
+    .clickable-title {
+      font-size: 3rem;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      letter-spacing: -0.02em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex: 1;
+
+      &:hover {
+        transform: translateY(-2px);
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      }
+    }
+
+    .header-spacer {
+      width: 48px;
+      height: 48px;
+    }
   }
 
   p {
@@ -260,6 +305,12 @@
         &.current-user {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
+        }
+
+        &.winner {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          font-weight: 700;
         }
       }
 
@@ -580,14 +631,53 @@
         font-weight: 600;
         
         &.current-user {
-          color: #ffd700;
+          .game-info {
+            flex: 1;
+            
+            .game-number {
+              font-size: 1.2rem;
+              font-weight: 600;
+              color: #333;
+              margin-bottom: 0.5rem;
+            }
+            
+            .players {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              font-size: 0.9rem;
+              margin-bottom: 0.3rem;
+              
+              .player {
+                font-weight: 500;
+                
+                &.current-user {
+                  color: #667eea;
+                  font-weight: 600;
+                }
+              }
+              
+              .vs {
+                color: #666;
+                font-size: 0.8rem;
+                font-weight: 400;
+              }
+            }
+            
+            .game-time {
+              display: flex;
+              align-items: center;
+              gap: 0.3rem;
+              font-size: 0.8rem;
+              color: #666;
+              
+              i {
+                font-size: 0.7rem;
+              }
+            }
+          }
+          margin-top: 2px;
         }
-      }
-
-      .vs {
-        margin: 0 10px;
-        font-weight: 400;
-        opacity: 0.8;
       }
     }
 
@@ -1070,6 +1160,32 @@
 
     .pagination-info {
       font-size: 0.8rem;
+    }
+  }
+}
+
+// Mobile responsive styles for header
+@media (max-width: 768px) {
+  .page-header {
+    .header-top {
+      .clickable-title {
+        font-size: 2rem;
+      }
+
+      .back-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0.5rem;
+
+        i {
+          font-size: 1rem;
+        }
+      }
+
+      .header-spacer {
+        width: 40px;
+        height: 40px;
+      }
     }
   }
 }

@@ -31,6 +31,7 @@ export interface GameHistoryDto {
   hostScore: number;
   guestScore: number;
   roundDtos: RoundDto[];
+  startedAt: string;
 }
 
 export interface PagedGameHistoryResponse {

@@ -362,13 +362,13 @@
   }
 
   .bottom-nav {
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.75rem;
     margin-top: 2rem;
     padding: 1rem;
 
     .nav-btn {
-      width: 100%;
+      flex: 1;
       padding: 0.875rem 1rem;
     }
   }

@@ -24,7 +24,7 @@ interface SinglePlayerRoom {
 export class SinglePlayerComponent implements OnInit {
   selectedContinents: string[] = [];
   availableContinents = [
-    { value: 'EUROPE', label: 'Europe', flag: '🇪🇺' },
+    { value: 'EUROPE', label: 'Europe', flag: '🌍' },
     { value: 'ASIA', label: 'Asia', flag: '🌏' },
     { value: 'AFRICA', label: 'Africa', flag: '🌍' },
     { value: 'NORTH_AMERICA', label: 'North America', flag: '🌎' },
