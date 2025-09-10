@@ -57,7 +57,8 @@ export class RoomComponent implements OnInit, OnDestroy {
     { value: 'NORTH_AMERICA', label: 'North America', selected: false },
     { value: 'SOUTH_AMERICA', label: 'South America', selected: false },
     { value: 'EUROPE', label: 'Europe', selected: false },
-    { value: 'AUSTRALIA', label: 'Australia & Oceania', selected: false }
+    { value: 'AUSTRALIA', label: 'Australia & Oceania', selected: false },
+    { value: 'USA_STATE', label: 'USA States', selected: false }
   ];
   showContinentSelection = false;
 
@@ -156,7 +157,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
     const closedListener = (e: any) => {
       this.ngZone.run(() => {
-        this.router.navigate(['/create-room']);
+        this.router.navigate(['/home']);
       });
     };
     window.addEventListener('room-closed', closedListener as EventListener);
@@ -189,7 +190,7 @@ export class RoomComponent implements OnInit, OnDestroy {
           if (roomClosed && roomClosed.roomId === this.roomId) {
             this.errorMessage = roomClosed.message || 'The room has been closed by the host.';
             setTimeout(() => {
-              this.router.navigate(['/create-room']);
+              this.router.navigate(['/home']);
             }, 3000);
           }
         });
@@ -213,15 +214,9 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.http.get<Room>(`${BASIC_URL}rooms/${this.roomId}`, { headers })
       .subscribe({
         next: (response) => {
-          if (
-            this.room && this.room.id === response.id &&
-            this.room.guestUserName && !response.guestUserName
-          ) {
-          } else {
-            this.room = response;
-            this.setupRoom();
-            this.loadUserInfo();
-          }
+          this.room = response;
+          this.setupRoom();
+          this.loadUserInfo();
           this.isLoading = false;
         },
         error: (error) => {
@@ -351,10 +346,15 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.http.post(`${BASIC_URL}rooms/cancel`, {}, { headers })
       .subscribe({
         next: () => {
-          this.router.navigate(['/create-room']);
+          localStorage.removeItem(`room_${this.roomId}_isHost`);
+          this.router.navigate(['/home']);
         },
         error: (error) => {
           this.errorMessage = 'Failed to leave room. Please try again.';
+          setTimeout(() => {
+            localStorage.removeItem(`room_${this.roomId}_isHost`);
+            this.router.navigate(['/home']);
+          }, 2000);
         }
       });
   }

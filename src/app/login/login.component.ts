@@ -3,7 +3,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth/auth.service';
 import { WebSocketService } from '../services/websocket.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +22,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
     private wsService: WebSocketService
   ) {
@@ -32,6 +34,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.setupFormListeners();
+    this.checkOAuth2Callback();
   }
 
   private setupFormListeners(): void {
@@ -74,5 +77,17 @@ export class LoginComponent implements OnInit {
         }
       });
     }
+  }
+
+  loginWithGoogle(): void {
+    window.location.href = `${environment.apiUrl.replace('/api/v1', '')}oauth2/authorization/google`;
+  }
+
+  private checkOAuth2Callback(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['error']) {
+        this.errorMessage = 'Google login failed. Please try again.';
+      }
+    });
   }
 }

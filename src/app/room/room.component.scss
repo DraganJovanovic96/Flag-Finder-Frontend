@@ -14,10 +14,55 @@
   color: white;
   margin-bottom: 2rem;
 
-  h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem 0;
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: white;
+      padding: 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+      }
+
+      i {
+        font-size: 1.2rem;
+      }
+    }
+
+    .clickable-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex: 1;
+
+      &:hover {
+        transform: translateY(-2px);
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      }
+    }
+
+    .header-spacer {
+      width: 48px;
+      height: 48px;
+    }
   }
 
   p {
@@ -899,8 +944,27 @@
     padding: 1rem;
   }
 
-  .page-header h1 {
-    font-size: 2rem;
+  .page-header {
+    .header-top {
+      .clickable-title {
+        font-size: 2rem;
+      }
+
+      .back-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0.5rem;
+
+        i {
+          font-size: 1rem;
+        }
+      }
+
+      .header-spacer {
+        width: 40px;
+        height: 40px;
+      }
+    }
   }
 
   .players-section {
@@ -956,7 +1020,6 @@
   }
   
   .form-actions {
-    flex-direction: column;
     align-items: stretch;
   }
   

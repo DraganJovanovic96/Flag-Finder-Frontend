@@ -41,7 +41,7 @@ export class AuthService {
           if (res.refresh_token) {
             this.cookieService.setCookie('refresh_token', res.refresh_token, false); // 30 days
           }
-          this.router.navigate(['/create-room']);
+          this.router.navigate(['/home']);
           return true;
         }
         return false;
@@ -119,14 +119,17 @@ export class AuthService {
     
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const username = payload.sub || payload.username || payload.email || payload.gameName || '';
-      if (!username) {
-        return 'drgghouse';
-      }
+      const username = payload.gameName || payload.sub || payload.username || payload.email || '';
+  
       
       return username;
     } catch (error) {
       return 'none';
     }
+  }
+
+  storeTokens(accessToken: string, refreshToken: string): void {
+    this.cookieService.setSessionCookie('access_token', accessToken);
+    this.cookieService.setCookie('refresh_token', refreshToken, false);
   }
 }
