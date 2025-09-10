@@ -127,4 +127,9 @@ export class AuthService {
       return 'none';
     }
   }
+
+  storeTokens(accessToken: string, refreshToken: string): void {
+    this.cookieService.setSessionCookie('access_token', accessToken);
+    this.cookieService.setCookie('refresh_token', refreshToken, false);
+  }
 }
