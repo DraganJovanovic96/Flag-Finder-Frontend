@@ -29,7 +29,8 @@ export class SinglePlayerComponent implements OnInit {
     { value: 'AFRICA', label: 'Africa', flag: '🌍' },
     { value: 'NORTH_AMERICA', label: 'North America', flag: '🌎' },
     { value: 'SOUTH_AMERICA', label: 'South America', flag: '🌎' },
-    { value: 'OCEANIA', label: 'Oceania', flag: '🌏' }
+    { value: 'OCEANIA', label: 'Oceania', flag: '🌏' },
+    { value: 'USA_STATE', label: 'USA States', flag: '🇺🇸' }
   ];
   
   isCreatingRoom = false;

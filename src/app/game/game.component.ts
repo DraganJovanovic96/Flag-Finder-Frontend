@@ -241,7 +241,6 @@ export class GameComponent implements OnInit, OnDestroy {
           }
           
           this.roundTimeRemaining = roundData?.timeRemaining || 0;
-          console.log('New round detected:', response.currentRound, 'Time remaining:', this.roundTimeRemaining);
           this.startRoundTimer();
           this.userGuess = '';
           this.guessMessage = '';
@@ -250,7 +249,6 @@ export class GameComponent implements OnInit, OnDestroy {
           // Update timer even if same round (in case backend time is more accurate)
           const newTimeRemaining = roundData?.timeRemaining || 0;
           if (Math.abs(this.roundTimeRemaining - newTimeRemaining) > 2) {
-            console.log('Syncing timer with backend:', this.roundTimeRemaining, '->', newTimeRemaining);
             this.roundTimeRemaining = newTimeRemaining;
             this.startRoundTimer();
           }
@@ -264,7 +262,6 @@ export class GameComponent implements OnInit, OnDestroy {
         if (response.currentRound >= response.totalRounds) {
           const roundData = response.currentRoundData || response.currentSinglePlayerRoundData;
           if (!roundData?.roundActive && response.status !== 'COMPLETED') {
-            console.log('Final round completed but game status not updated, forcing game end');
             this.handleGameEnd();
           }
         }
@@ -281,12 +278,10 @@ export class GameComponent implements OnInit, OnDestroy {
     
     const roundData = this.game?.currentRoundData || this.game?.currentSinglePlayerRoundData;
     if (!roundData?.roundActive) {
-      console.log('Round not active, not starting timer. RoundData:', roundData);
       return;
     }
     
     this.roundTimeRemaining = roundData.timeRemaining;
-    console.log('Starting timer with time:', this.roundTimeRemaining, 'Round active:', roundData.roundActive);
     
     this.roundTimerInterval = setInterval(() => {
       this.roundTimeRemaining--;
@@ -294,11 +289,9 @@ export class GameComponent implements OnInit, OnDestroy {
       if (this.roundTimeRemaining <= 0) {
         clearInterval(this.roundTimerInterval);
         this.roundTimerInterval = null;
-        console.log('Round timer expired');
         
         // Check if this was the final round
         if (this.game && this.game.currentRound >= this.game.totalRounds) {
-          console.log('Final round timer expired, checking for game completion...');
           // Give a small delay to allow backend to process, then check game state
           setTimeout(() => {
             this.fetchGameState();
@@ -443,7 +436,6 @@ export class GameComponent implements OnInit, OnDestroy {
     
     // Ensure game status is set to COMPLETED for UI display
     if (this.game && this.game.status !== 'COMPLETED') {
-      console.log('Forcing game status to COMPLETED for end screen display');
       this.game.status = 'COMPLETED';
     }
     
@@ -604,11 +596,9 @@ export class GameComponent implements OnInit, OnDestroy {
             // Multiplayer - use gameRounds as before
             this.gameRounds = rounds;
           }
-          console.log('Fetched rounds:', rounds);
           this.cdr.detectChanges();
         },
         error: (error) => {
-          console.log('Error fetching rounds:', error);
           // Set empty arrays on error
           if (this.game?.playerName) {
             this.singlePlayerRounds = [];
