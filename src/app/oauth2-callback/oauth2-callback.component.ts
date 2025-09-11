@@ -59,12 +59,10 @@ export class OAuth2CallbackComponent implements OnInit {
       const refreshToken = params['refreshToken'];
       
       if (token && refreshToken) {
-        // Store tokens and redirect to home
         this.authService.storeTokens(token, refreshToken);
         this.wsService.connect();
         this.router.navigate(['/home']);
       } else {
-        // Handle error case
         this.router.navigate(['/login'], { queryParams: { error: 'oauth2_failed' } });
       }
     });

@@ -6,10 +6,12 @@ import { GameComponent } from './game/game.component';
 import { ProfileComponent } from './profile/profile.component';
 import { SinglePlayerComponent } from './single-player/single-player.component';
 import { OAuth2CallbackComponent } from './oauth2-callback/oauth2-callback.component';
+import { SetupGameNameComponent } from './setup-gamename/setup-gamename.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'oauth2/callback', component: OAuth2CallbackComponent },
+  { path: 'setup-gamename', component: SetupGameNameComponent },
   { path: 'home', component: CreateRoomComponent },
   { path: 'room/:id', component: RoomComponent },
   { path: 'game/:roomId', component: GameComponent },
