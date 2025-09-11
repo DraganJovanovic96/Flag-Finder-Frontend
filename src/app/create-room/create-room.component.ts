@@ -104,9 +104,6 @@ export class CreateRoomComponent implements OnInit {
     this.router.navigate(['/profile']);
   }
 
-  goToFriends(): void {
-    this.router.navigate(['/friends']);
-  }
 
   startSoloPractice(): void {
     this.router.navigate(['/single-player']);

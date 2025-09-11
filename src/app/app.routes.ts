@@ -7,7 +7,6 @@ import { ProfileComponent } from './profile/profile.component';
 import { SinglePlayerComponent } from './single-player/single-player.component';
 import { OAuth2CallbackComponent } from './oauth2-callback/oauth2-callback.component';
 import { SetupGameNameComponent } from './setup-gamename/setup-gamename.component';
-import { FriendsComponent } from './friends/friends.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -19,7 +18,6 @@ export const routes: Routes = [
   { path: 'single-player', component: SinglePlayerComponent },
   { path: 'single-player-game/:roomId', component: GameComponent },
   { path: 'profile', component: ProfileComponent },
-  { path: 'friends', component: FriendsComponent },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', redirectTo: '/home' }
 ];

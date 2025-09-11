@@ -1,14 +1,16 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { WebSocketService } from './services/websocket.service';
+import { AuthService } from './services/auth/auth.service';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../environments/environment';
+import { FriendsWidgetComponent } from './components/friends-widget/friends-widget.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, FriendsWidgetComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
@@ -37,7 +39,17 @@ export class AppComponent implements OnInit {
   private friendRequestTimeout: any;
   private friendResponseTimeout: any;
 
-  constructor(private wsService: WebSocketService, private http: HttpClient) {
+  constructor(private wsService: WebSocketService, private http: HttpClient, private authService: AuthService) {}
+
+  ngOnInit(): void {
+    this.setupWebSocketSubscriptions();
+    // Only connect WebSocket if user is authenticated
+    if (this.authService.isAuthenticated()) {
+      this.wsService.connect();
+    }
+  }
+
+  private setupWebSocketSubscriptions(): void {
     this.wsService.invites$.subscribe((invite) => {
       if (invite?.initiatorUserName) {
         this.showInvite(invite);
@@ -55,10 +67,6 @@ export class AppComponent implements OnInit {
         this.showFriendResponse(response);
       }
     });
-  }
-
-  ngOnInit(): void {
-    this.wsService.connect();
   }
 
   private showInvite(invite: any): void {

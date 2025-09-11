@@ -31,9 +31,12 @@ export class WebSocketService {
   connect(): void {
     if (this.client?.connected) return;
     const token = this.cookieService.getCookie('access_token');
-    if (!token) return;
+    if (!token) {
+      console.log('No token available for WebSocket connection');
+      return;
+    }
 
-    const wsBase = environment.apiUrl.replace('/api/v1/', '').replace('http', 'ws');
+    const wsBase = environment.apiUrl.replace('/api/v1/', '').replace('http://', 'ws://').replace('https://', 'wss://');
     this.client = new Client({
       brokerURL: `${wsBase}/ws-native?token=${encodeURIComponent(token)}`,
       connectHeaders: { Authorization: `Bearer ${token}` },
