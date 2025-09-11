@@ -1,0 +1,256 @@
+.friends-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.friends-header {
+  text-align: center;
+  margin-bottom: 30px;
+  
+  h2 {
+    color: #2d3748;
+    margin: 0 0 8px 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+  
+  .subtitle {
+    color: #718096;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+.error-message {
+  background: #fed7d7;
+  color: #c53030;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #feb2b2;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  .close-btn {
+    font-size: 1.2rem;
+    font-weight: bold;
+    opacity: 0.7;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.friends-section {
+  margin-bottom: 30px;
+  
+  h3 {
+    color: #2d3748;
+    margin: 0 0 16px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+}
+
+.send-request-form {
+  background: #f7fafc;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  
+  .form-group {
+    margin-bottom: 16px;
+    
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #4a5568;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    
+    input, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s ease;
+      
+      &:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+      
+      &:disabled {
+        background: #edf2f7;
+        cursor: not-allowed;
+      }
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+  }
+}
+
+.requests-list, .friends-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.request-item, .friend-item {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  
+  &:hover {
+    background: #edf2f7;
+  }
+}
+
+.request-info, .friend-info {
+  flex: 1;
+  
+  strong {
+    color: #2d3748;
+    font-size: 1rem;
+    display: block;
+    margin-bottom: 4px;
+  }
+  
+  .request-message {
+    color: #4a5568;
+    font-style: italic;
+    margin: 8px 0 4px 0;
+    font-size: 0.9rem;
+    background: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border-left: 3px solid #cbd5e0;
+  }
+  
+  .request-date, .friend-since {
+    color: #718096;
+    font-size: 0.8rem;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 8px;
+    
+    &.pending {
+      background: #fef5e7;
+      color: #d69e2e;
+      border: 1px solid #f6e05e;
+    }
+  }
+}
+
+.request-actions, .friend-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-primary, .btn-secondary, .btn-danger {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  min-width: 70px;
+  text-align: center;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+  }
+}
+
+.btn-secondary {
+  background: #f7fafc;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+  
+  &:hover:not(:disabled) {
+    background: #edf2f7;
+  }
+}
+
+.btn-danger {
+  background: #fed7d7;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+  
+  &:hover:not(:disabled) {
+    background: #fbb6ce;
+  }
+}
+
+.empty-state {
+  color: #718096;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e0;
+}
+
+@media (max-width: 600px) {
+  .friends-container {
+    margin: 10px;
+    padding: 16px;
+  }
+  
+  .request-item, .friend-item {
+    flex-direction: column;
+    gap: 12px;
+    
+    .request-actions, .friend-actions {
+      align-self: stretch;
+      
+      button {
+        flex: 1;
+      }
+    }
+  }
+  
+  .send-request-form {
+    padding: 16px;
+  }
+}

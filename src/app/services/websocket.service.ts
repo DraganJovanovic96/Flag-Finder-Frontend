@@ -13,6 +13,8 @@ export class WebSocketService {
   private gameStartedSub: StompSubscription | null = null;
   private roundStartedSub: StompSubscription | null = null;
   private gameEndedSub: StompSubscription | null = null;
+  private friendRequestSub: StompSubscription | null = null;
+  private friendResponseSub: StompSubscription | null = null;
   private roomUpdateHandlers = new Map<string, ((payload: any) => void)[]>();
 
   public invites$ = new ReplaySubject<{ initiatorUserName: string; targetUserName: string; gameId: string }>(1);
@@ -21,6 +23,8 @@ export class WebSocketService {
   public gameStarted$ = new ReplaySubject<any>(1);
   public roundStarted$ = new ReplaySubject<any>(1);
   public gameEnded$ = new ReplaySubject<any>(1);
+  public friendRequest$ = new ReplaySubject<any>(1);
+  public friendResponse$ = new ReplaySubject<any>(1);
 
   constructor(private cookieService: CookieService) {}
 
@@ -98,6 +102,24 @@ export class WebSocketService {
         } catch (e) {
         }
       });
+
+      this.friendRequestSub = this.client!.subscribe('/user/queue/friend-request', (msg: IMessage) => {
+        try {
+          const payload = JSON.parse(msg.body);
+          this.friendRequest$.next(payload);
+          window.dispatchEvent(new CustomEvent('friend-request', { detail: payload }));
+        } catch (e) {
+        }
+      });
+
+      this.friendResponseSub = this.client!.subscribe('/user/queue/friend-response', (msg: IMessage) => {
+        try {
+          const payload = JSON.parse(msg.body);
+          this.friendResponse$.next(payload);
+          window.dispatchEvent(new CustomEvent('friend-response', { detail: payload }));
+        } catch (e) {
+        }
+      });
       
     };
 
@@ -120,6 +142,8 @@ export class WebSocketService {
     this.gameStartedSub?.unsubscribe();
     this.roundStartedSub?.unsubscribe();
     this.gameEndedSub?.unsubscribe();
+    this.friendRequestSub?.unsubscribe();
+    this.friendResponseSub?.unsubscribe();
     this.client?.deactivate();
     this.client = null;
   }
