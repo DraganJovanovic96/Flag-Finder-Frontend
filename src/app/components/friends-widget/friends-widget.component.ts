@@ -20,13 +20,19 @@ export class FriendsWidgetComponent implements OnInit, OnDestroy {
   
   friends: any[] = [];
   friendRequests: any[] = [];
-  newFriendUsername = '';
-  requestMessage = '';
+  newFriendUsername: string = '';
   isLoading = false;
   error = '';
+  notification = '';
+  private notificationTimeout: any;
+  confirmDialog: {
+    show: boolean;
+    friendName: string;
+  } = { show: false, friendName: '' };
   
   private friendRequestSub?: Subscription;
   private friendResponseSub?: Subscription;
+  private friendRemovedSub?: Subscription;
 
   constructor(
     private http: HttpClient,
@@ -46,29 +52,58 @@ export class FriendsWidgetComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.friendRequestSub?.unsubscribe();
     this.friendResponseSub?.unsubscribe();
+    this.friendRemovedSub?.unsubscribe();
   }
 
   private setupWebSocketListeners(): void {
     this.friendRequestSub = this.webSocketService.friendRequest$.subscribe((data) => {
       if (data) {
+        console.log('Received friend request notification:', data);
         this.loadFriendRequests();
+        // Also refresh friends list in case of status changes
+        this.loadFriends();
+        // Use the senderUsername from the notification
         this.showNotification(`Friend request from ${data.senderUsername}`);
       }
     });
 
     this.friendResponseSub = this.webSocketService.friendResponse$.subscribe((data) => {
       if (data) {
+        console.log('Received friend response notification:', data);
         this.loadFriends();
-        const message = data.accepted ? 
-          `${data.username} accepted your friend request!` : 
-          `${data.username} declined your friend request`;
+        // Also refresh friend requests to remove processed requests
+        this.loadFriendRequests();
+        // Use the senderUsername from the notification (person who responded)
+        const message = data.action === 'ACCEPTED' ? 
+          `${data.senderUsername} accepted your friend request!` : 
+          `${data.senderUsername} declined your friend request`;
         this.showNotification(message);
+      }
+    });
+
+    this.friendRemovedSub = this.webSocketService.friendRemoved$.subscribe((data) => {
+      if (data) {
+        console.log('Received friend removed notification:', data);
+        this.loadFriends();
+        // Use the senderUsername from the notification (person who removed the friend)
+        this.showNotification(`${data.senderUsername} removed you from their friends list`);
       }
     });
   }
 
   private showNotification(message: string): void {
     console.log('Friend notification:', message);
+    this.notification = message;
+    
+    // Clear any existing timeout
+    if (this.notificationTimeout) {
+      clearTimeout(this.notificationTimeout);
+    }
+    
+    // Auto-hide notification after 5 seconds
+    this.notificationTimeout = setTimeout(() => {
+      this.notification = '';
+    }, 5000);
   }
 
   toggleWidget(): void {
@@ -77,7 +112,7 @@ export class FriendsWidgetComponent implements OnInit, OnDestroy {
       this.loadFriends();
       this.loadFriendRequests();
       // Setup WebSocket listeners if not already done
-      if (!this.friendRequestSub && !this.friendResponseSub) {
+      if (!this.friendRequestSub || !this.friendResponseSub || !this.friendRemovedSub) {
         this.setupWebSocketListeners();
       }
     }
@@ -103,7 +138,22 @@ export class FriendsWidgetComponent implements OnInit, OnDestroy {
         next: (data: any) => {
           console.log('Friends loaded:', data);
           console.log('First friend object:', data[0]);
-          this.friends = data || [];
+          
+          // Process friends to determine the correct friend name (not current user's name)
+          const currentUserName = this.authService.getCurrentUserGameName();
+          this.friends = (data || []).map((friendship: any) => {
+            // Determine which user is the friend (not the current user)
+            const friendName = friendship.initiatorUserName === currentUserName 
+              ? friendship.targetUserName 
+              : friendship.initiatorUserName;
+            
+            return {
+              ...friendship,
+              friendName: friendName
+            };
+          });
+          
+          console.log('Processed friends:', this.friends);
         },
         error: (err) => {
           console.error('Failed to load friends:', err);
@@ -145,7 +195,6 @@ export class FriendsWidgetComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.newFriendUsername = '';
-          this.requestMessage = '';
           this.isLoading = false;
           this.setActiveTab('friends');
         },
@@ -176,6 +225,11 @@ export class FriendsWidgetComponent implements OnInit, OnDestroy {
           console.log('Friend request response successful:', response);
           this.loadFriendRequests();
           this.loadFriends();
+          
+          // If user accepted the friend request, switch to friends tab
+          if (accepted) {
+            this.setActiveTab('friends');
+          }
         },
         error: (err) => {
           console.error('Failed to respond to friend request:', err);
@@ -186,12 +240,85 @@ export class FriendsWidgetComponent implements OnInit, OnDestroy {
   }
 
   removeFriend(friendUsername: string): void {
-    if (!confirm(`Remove ${friendUsername} from friends?`)) {
+    if (!friendUsername) {
+      this.error = 'Invalid friend data';
       return;
     }
 
-    // Remove friend functionality not implemented in backend yet
-    this.error = 'Remove friend feature not yet implemented';
+    this.confirmDialog = {
+      show: true,
+      friendName: friendUsername
+    };
+  }
+
+  confirmRemoveFriend(): void {
+    const friendUsername = this.confirmDialog.friendName;
+    this.confirmDialog = { show: false, friendName: '' };
+
+    console.log('Removing friend:', friendUsername);
+    this.http.delete(`${environment.apiUrl}friends/${encodeURIComponent(friendUsername)}`, { headers: this.getHeaders() })
+      .subscribe({
+        next: () => {
+          console.log('Friend removed successfully');
+          this.loadFriends();
+        },
+        error: (err) => {
+          console.error('Failed to remove friend:', err);
+          this.error = `Failed to remove friend: ${err.status} - ${err.error?.message || err.statusText}`;
+        }
+      });
+  }
+
+  cancelRemoveFriend(): void {
+    this.confirmDialog = { show: false, friendName: '' };
+  }
+
+  inviteToGame(friendName: string): void {
+    if (!friendName) {
+      this.error = 'Invalid friend data';
+      return;
+    }
+
+    console.log('Inviting friend to game:', friendName);
+    
+    // First create a room
+    this.http.post<any>(`${environment.apiUrl}rooms/create`, {}, { headers: this.getHeaders() })
+      .subscribe({
+        next: (roomResponse) => {
+          console.log('Room created:', roomResponse);
+          
+          // Store that we're the host
+          localStorage.setItem(`room_${roomResponse.id}_isHost`, 'true');
+          
+          // Now send invite to the friend
+          const inviteRequest = {
+            friendUserName: friendName
+          };
+          
+          this.http.post(`${environment.apiUrl}rooms/invite`, inviteRequest, { headers: this.getHeaders() })
+            .subscribe({
+              next: (inviteResponse) => {
+                console.log('Invite sent:', inviteResponse);
+                this.showNotification(`Game invite sent to ${friendName}!`);
+                
+                // Navigate to the room
+                window.location.href = `/room/${roomResponse.id}`;
+              },
+              error: (err) => {
+                console.error('Failed to send invite:', err);
+                this.error = `Failed to send invite: ${err.error?.message || err.statusText}`;
+              }
+            });
+        },
+        error: (err) => {
+          console.error('Failed to create room:', err);
+          if (err.status === 409) {
+            this.error = 'You already have an active room. Please leave it first.';
+          } else {
+            this.error = `Failed to create room: ${err.error?.message || err.statusText}`;
+          }
+        }
+      });
   }
 
   clearError(): void {

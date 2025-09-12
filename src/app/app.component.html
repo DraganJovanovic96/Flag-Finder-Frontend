@@ -31,19 +31,6 @@
     </div>
   </div>
 
-  <div class="friend-request-modal" 
-       [class.closing]="isFriendRequestClosing"
-       *ngIf="pendingFriendRequest as req">
-    <div class="friend-request-card">
-      <h3>Friend Request</h3>
-      <p><strong>{{ req.senderUsername }}</strong> wants to be your friend.</p>
-      <p class="request-message" *ngIf="req.message">{{ req.message }}</p>
-      <div class="actions">
-        <button class="btn-secondary" (click)="declineFriendRequest()">Decline</button>
-        <button class="btn-primary" (click)="acceptFriendRequest()">Accept</button>
-      </div>
-    </div>
-  </div>
 
   <div class="friend-response-modal" 
        [class.closing]="isFriendResponseClosing"

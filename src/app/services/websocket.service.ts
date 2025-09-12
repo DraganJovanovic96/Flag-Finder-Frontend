@@ -15,6 +15,7 @@ export class WebSocketService {
   private gameEndedSub: StompSubscription | null = null;
   private friendRequestSub: StompSubscription | null = null;
   private friendResponseSub: StompSubscription | null = null;
+  private friendRemovedSub: StompSubscription | null = null;
   private roomUpdateHandlers = new Map<string, ((payload: any) => void)[]>();
 
   public invites$ = new ReplaySubject<{ initiatorUserName: string; targetUserName: string; gameId: string }>(1);
@@ -25,6 +26,7 @@ export class WebSocketService {
   public gameEnded$ = new ReplaySubject<any>(1);
   public friendRequest$ = new ReplaySubject<any>(1);
   public friendResponse$ = new ReplaySubject<any>(1);
+  public friendRemoved$ = new ReplaySubject<any>(1);
 
   constructor(private cookieService: CookieService) {}
 
@@ -44,6 +46,7 @@ export class WebSocketService {
     });
 
     this.client.onConnect = () => {
+      console.log('WebSocket connected successfully');
       this.inviteSub = this.client!.subscribe('/user/queue/invites', (msg: IMessage) => {
         try { this.invites$.next(JSON.parse(msg.body)); } catch (e) { }
       });
@@ -108,31 +111,52 @@ export class WebSocketService {
 
       this.friendRequestSub = this.client!.subscribe('/user/queue/friend-request', (msg: IMessage) => {
         try {
+          console.log('Received friend request WebSocket message:', msg.body);
           const payload = JSON.parse(msg.body);
+          console.log('Parsed friend request payload:', payload);
           this.friendRequest$.next(payload);
           window.dispatchEvent(new CustomEvent('friend-request', { detail: payload }));
         } catch (e) {
+          console.error('Error processing friend request message:', e);
         }
       });
 
       this.friendResponseSub = this.client!.subscribe('/user/queue/friend-response', (msg: IMessage) => {
         try {
+          console.log('Received friend response WebSocket message:', msg.body);
           const payload = JSON.parse(msg.body);
+          console.log('Parsed friend response payload:', payload);
           this.friendResponse$.next(payload);
           window.dispatchEvent(new CustomEvent('friend-response', { detail: payload }));
         } catch (e) {
+          console.error('Error processing friend response message:', e);
+        }
+      });
+
+      this.friendRemovedSub = this.client!.subscribe('/user/queue/friend-removed', (msg: IMessage) => {
+        try {
+          console.log('Received friend removed WebSocket message:', msg.body);
+          const payload = JSON.parse(msg.body);
+          console.log('Parsed friend removed payload:', payload);
+          this.friendRemoved$.next(payload);
+          window.dispatchEvent(new CustomEvent('friend-removed', { detail: payload }));
+        } catch (e) {
+          console.error('Error processing friend removed message:', e);
         }
       });
       
     };
 
     this.client.onStompError = (frame) => {
+      console.error('WebSocket STOMP error:', frame);
     };
 
     this.client.onWebSocketClose = (evt) => {
+      console.log('WebSocket connection closed:', evt);
     };
 
     this.client.onWebSocketError = (evt) => {
+      console.error('WebSocket error:', evt);
     };
 
     this.client.activate();
@@ -147,6 +171,7 @@ export class WebSocketService {
     this.gameEndedSub?.unsubscribe();
     this.friendRequestSub?.unsubscribe();
     this.friendResponseSub?.unsubscribe();
+    this.friendRemovedSub?.unsubscribe();
     this.client?.deactivate();
     this.client = null;
   }

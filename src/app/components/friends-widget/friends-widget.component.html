@@ -49,15 +49,15 @@
           No friends yet
         </div>
         <div *ngFor="let friend of friends" class="friend-item">
-          <div class="friend-info">
-            <div class="friend-avatar">{{ (friend.username || friend.initiatorUserName || friend.targetUserName || 'U').charAt(0).toUpperCase() }}</div>
+          <div class="friend-info" (click)="inviteToGame(friend.friendName)" title="Click to invite to game">
+            <div class="friend-avatar">{{ (friend.friendName || 'U').charAt(0).toUpperCase() }}</div>
             <div class="friend-details">
-              <div class="friend-name">{{ friend.username || friend.initiatorUserName || friend.targetUserName || 'Unknown' }}</div>
+              <div class="friend-name">{{ friend.friendName || 'Unknown' }}</div>
               <div class="friend-status">Online</div>
             </div>
           </div>
           <div class="friend-actions">
-            <button class="action-btn remove" (click)="removeFriend(friend.username || friend.initiatorUserName || friend.targetUserName)" title="Remove friend">
+            <button class="action-btn remove" (click)="removeFriend(friend.friendName)" title="Remove friend">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
               </svg>
@@ -105,17 +105,8 @@
             [(ngModel)]="newFriendUsername" 
             placeholder="Enter username"
             [disabled]="isLoading"
-            class="form-input">
-        </div>
-        <div class="form-group">
-          <label for="message">Message (optional)</label>
-          <textarea 
-            id="message"
-            [(ngModel)]="requestMessage" 
-            placeholder="Add a personal message..."
-            rows="3"
-            [disabled]="isLoading"
-            class="form-textarea"></textarea>
+            class="form-input"
+            (keydown.enter)="sendFriendRequest()">
         </div>
         <button 
           class="send-btn" 
@@ -124,6 +115,23 @@
           {{ isLoading ? 'Sending...' : 'Send Request' }}
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Dialog -->
+<div class="confirm-dialog-backdrop" *ngIf="confirmDialog.show" (click)="cancelRemoveFriend()">
+  <div class="confirm-dialog" (click)="$event.stopPropagation()">
+    <div class="confirm-header">
+      <h4>Remove Friend</h4>
+    </div>
+    <div class="confirm-body">
+      <p>Are you sure you want to remove <strong>{{ confirmDialog.friendName }}</strong> from your friends list?</p>
+      <p class="confirm-note">This action cannot be undone.</p>
+    </div>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="cancelRemoveFriend()">Cancel</button>
+      <button class="btn-confirm" (click)="confirmRemoveFriend()">Remove Friend</button>
     </div>
   </div>
 </div>

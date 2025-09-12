@@ -2,7 +2,7 @@
   position: fixed;
   bottom: 20px;
   right: 20px;
-  z-index: 1000;
+  z-index: 1050; /* Lower than invite modal but higher than other elements */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -201,10 +201,19 @@
   }
 }
 
-.friend-info, .request-info {
+.friend-info, .friend-info {
   display: flex;
   align-items: center;
   flex: 1;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 6px;
+  padding: 4px;
+  margin: -4px;
+  
+  &:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+  }
 }
 
 .friend-avatar {
@@ -376,5 +385,133 @@
     width: calc(100vw - 40px);
     right: -10px;
     max-height: 400px;
+  }
+}
+
+// Confirmation Dialog Styles
+.confirm-dialog-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200; /* Highest z-index for modal dialogs */
+  animation: fadeIn 0.2s ease-out;
+}
+
+.confirm-dialog {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  width: 90%;
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+.confirm-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e0e0e0;
+  
+  h4 {
+    margin: 0;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+  }
+}
+
+.confirm-body {
+  padding: 20px 24px;
+  
+  p {
+    margin: 0 0 12px 0;
+    color: #555;
+    line-height: 1.5;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  .confirm-note {
+    font-size: 14px;
+    color: #888;
+    font-style: italic;
+  }
+  
+  strong {
+    color: #333;
+    font-weight: 600;
+  }
+}
+
+.confirm-actions {
+  padding: 16px 24px 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  
+  button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    }
+  }
+  
+  .btn-cancel {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+    
+    &:hover {
+      background: #e9ecef;
+      color: #495057;
+    }
+  }
+  
+  .btn-confirm {
+    background: #dc3545;
+    color: white;
+    
+    &:hover {
+      background: #c82333;
+    }
+    
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
