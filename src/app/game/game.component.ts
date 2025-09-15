@@ -516,13 +516,13 @@ export class GameComponent implements OnInit, OnDestroy {
       .set('Accept', '*/*')
       .set('Authorization', `Bearer ${localStorage.getItem('token')}`);
 
-    const url = `${BASIC_URL}countries/search?prefix=${encodeURIComponent(prefix)}`;
+    const url = `${BASIC_URL}countries/search/bilingual?prefix=${encodeURIComponent(prefix)}`;
 
     this.http.get<any[]>(url, { headers })
       .subscribe({
         next: (countries) => {
           this.countrySuggestions = countries;
-          this.showSuggestions = countries.length > 0 && countries.length <= 5;
+          this.showSuggestions = countries.length > 0 && countries.length <= 10;
           this.selectedSuggestionIndex = -1;
           this.cdr.detectChanges();
           
@@ -534,7 +534,7 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   selectSuggestion(country: any): void {
-    this.userGuess = country.nameOfCounty;
+    this.userGuess = country.englishName;
     this.hideSuggestions();
   }
 

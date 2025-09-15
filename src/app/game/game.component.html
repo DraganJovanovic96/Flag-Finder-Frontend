@@ -306,7 +306,8 @@
                 [class.selected]="i === selectedSuggestionIndex"
                 (mousedown)="selectSuggestion(country)"
               >
-                {{ country.nameOfCounty }}
+                <span class="country-english">{{ country.englishName }}</span>
+                <span *ngIf="country.serbianName" class="country-serbian">({{ country.serbianName }})</span>
               </div>
             </div>
           </div>
