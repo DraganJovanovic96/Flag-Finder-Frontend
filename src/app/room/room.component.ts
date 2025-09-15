@@ -52,7 +52,6 @@ export class RoomComponent implements OnInit, OnDestroy {
   guestUserInfo: UserInfo | null = null;
   loadingUserInfo = false;
 
-  // Round selection properties
   selectedRounds = 5;
   roundOptions = [
     { value: 3, label: '3 Rounds' },
@@ -210,10 +209,8 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   setupRoom(): void {
     if (this.room) {
-      // Initialize selectedRounds from room data
       this.selectedRounds = this.room.numberOfRounds || 5;
       
-      // Set host status based on JWT token comparison with room data
       this.isHost = this.room.hostUserName === this.currentUsername;
     }
   }
@@ -502,7 +499,6 @@ export class RoomComponent implements OnInit, OnDestroy {
   onRoundsChange(): void {
     if (!this.room) return;
     
-    // Update the room's numberOfRounds via API
     const updateRequest = {
       numberOfRounds: this.selectedRounds
     };
@@ -516,8 +512,6 @@ export class RoomComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Failed to update rounds:', error);
-        // Revert selection on error
         this.selectedRounds = this.room?.numberOfRounds || 5;
       }
     });

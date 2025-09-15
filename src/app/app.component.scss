@@ -51,20 +51,19 @@
 .invite-modal {
   position: fixed;
   bottom: 30px;
-  right: 100px; /* Move left to avoid friends widget */
-  z-index: 1100; /* Higher z-index than friends widget */
+  right: 100px;
+  z-index: 1100;
   animation: slideIn 0.3s ease-out forwards;
   max-width: 350px;
-  width: calc(100% - 160px); /* Adjust width to account for new position */
+  width: calc(100% - 160px);
   
   &.closing {
     animation: slideOut 0.3s ease-in forwards;
   }
   
-  /* On mobile, stack vertically above friends widget */
   @media (max-width: 768px) {
     right: 20px;
-    bottom: 100px; /* Position above friends widget on mobile */
+    bottom: 100px;
     width: calc(100% - 40px);
   }
 }

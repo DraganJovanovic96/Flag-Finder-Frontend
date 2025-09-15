@@ -142,7 +142,6 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Clear round timer
     if (this.roundTimerInterval) {
       clearInterval(this.roundTimerInterval);
       this.roundTimerInterval = null;
@@ -235,9 +234,7 @@ export class GameComponent implements OnInit, OnDestroy {
         const roundData = response.currentRoundData || response.currentSinglePlayerRoundData;
         
         if (oldRound !== response.currentRound) {
-          // Store the previous round data for single player
           if (this.game?.playerName && oldRound && oldRound > 0) {
-            // Store previous round data - implementation needed
           }
           
           this.roundTimeRemaining = roundData?.timeRemaining || 0;
@@ -246,7 +243,6 @@ export class GameComponent implements OnInit, OnDestroy {
           this.guessMessage = '';
           this.focusGuessInput();
         } else {
-          // Update timer even if same round (in case backend time is more accurate)
           const newTimeRemaining = roundData?.timeRemaining || 0;
           if (Math.abs(this.roundTimeRemaining - newTimeRemaining) > 2) {
             this.roundTimeRemaining = newTimeRemaining;
@@ -258,7 +254,6 @@ export class GameComponent implements OnInit, OnDestroy {
           this.handleGameEnd();
         }
         
-        // Additional check: if we've reached the final round and it's not active, the game should be completed
         if (response.currentRound >= response.totalRounds) {
           const roundData = response.currentRoundData || response.currentSinglePlayerRoundData;
           if (!roundData?.roundActive && response.status !== 'COMPLETED') {
@@ -290,9 +285,7 @@ export class GameComponent implements OnInit, OnDestroy {
         clearInterval(this.roundTimerInterval);
         this.roundTimerInterval = null;
         
-        // Check if this was the final round
         if (this.game && this.game.currentRound >= this.game.totalRounds) {
-          // Give a small delay to allow backend to process, then check game state
           setTimeout(() => {
             this.fetchGameState();
           }, 2000);
@@ -416,7 +409,7 @@ export class GameComponent implements OnInit, OnDestroy {
           if (animationElement.parentNode) {
             animationElement.remove();
           }
-        }, 2100);
+        }, 2000);
       } else {
       }
     } catch (error) {
@@ -434,12 +427,10 @@ export class GameComponent implements OnInit, OnDestroy {
       this.gameStateInterval = null;
     }
     
-    // Ensure game status is set to COMPLETED for UI display
     if (this.game && this.game.status !== 'COMPLETED') {
       this.game.status = 'COMPLETED';
     }
     
-    // Fetch rounds for both single player and multiplayer games
     if (this.game?.id) {
       this.fetchGameRounds();
     }
@@ -590,16 +581,13 @@ export class GameComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (rounds) => {
           if (this.game?.playerName) {
-            // Single player - use the fetched data for singlePlayerRounds
             this.singlePlayerRounds = rounds;
           } else {
-            // Multiplayer - use gameRounds as before
             this.gameRounds = rounds;
           }
           this.cdr.detectChanges();
         },
         error: (error) => {
-          // Set empty arrays on error
           if (this.game?.playerName) {
             this.singlePlayerRounds = [];
           } else {
@@ -616,7 +604,6 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   getSinglePlayerGameName(): string {
-    // Get the game name from the first guess in the rounds data (for end screen)
     if (this.singlePlayerRounds && this.singlePlayerRounds.length > 0) {
       for (const round of this.singlePlayerRounds) {
         if (round.guesses && round.guesses.length > 0) {
@@ -624,7 +611,6 @@ export class GameComponent implements OnInit, OnDestroy {
         }
       }
     }
-    // During gameplay, use hostName from backend (like multiplayer does)
     return this.game?.hostName || '';
   }
 
@@ -642,7 +628,6 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   buildSinglePlayerRoundsData(): void {
-    // Create mock rounds data for single player based on game info
     if (!this.game?.playerName || !this.game?.totalRounds) return;
     
     this.singlePlayerRounds = [];
@@ -655,7 +640,7 @@ export class GameComponent implements OnInit, OnDestroy {
         },
         guesses: [{
           userGameName: this.game.playerName,
-          correct: Math.random() > 0.5, // Random for now
+          correct: Math.random() > 0.5,
           guessedCountryName: `Guessed Country ${i}`
         }]
       });

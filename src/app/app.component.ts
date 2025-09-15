@@ -46,14 +46,12 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.setupWebSocketSubscriptions();
     this.setupRouteListener();
-    // Only connect WebSocket if user is authenticated
     if (this.authService.isAuthenticated()) {
       this.wsService.connect();
     }
   }
 
   private setupRouteListener(): void {
-    // Hide friends widget on login and auth-related pages
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event) => {
@@ -62,7 +60,6 @@ export class AppComponent implements OnInit {
       this.showFriendsWidget = !hiddenRoutes.includes(navigationEnd.url) && this.authService.isAuthenticated();
     });
 
-    // Initial check
     const hiddenRoutes = ['/login', '/oauth2/callback', '/setup-gamename'];
     this.showFriendsWidget = !hiddenRoutes.includes(this.router.url) && this.authService.isAuthenticated();
   }

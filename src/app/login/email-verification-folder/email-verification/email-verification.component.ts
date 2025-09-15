@@ -19,7 +19,6 @@ export class EmailVerificationComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // Simulate email verification process
     setTimeout(() => {
       this.verificationStatus = 'success';
       setTimeout(() => {

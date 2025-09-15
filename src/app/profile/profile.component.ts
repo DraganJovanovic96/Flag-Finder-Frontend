@@ -58,7 +58,6 @@ export class ProfileComponent implements OnInit {
         this.totalWonGames = count;
       },
       error: (error) => {
-        console.error('Failed to load won games count:', error);
       }
     });
 
@@ -67,7 +66,6 @@ export class ProfileComponent implements OnInit {
         this.totalDrawGames = count;
       },
       error: (error) => {
-        console.error('Failed to load draw games count:', error);
       }
     });
   }

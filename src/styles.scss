@@ -1,8 +1,5 @@
-/* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
-
-/* CSS Reset and Global Styles */
 * {
   margin: 0;
   padding: 0;
@@ -24,20 +21,17 @@ body {
   min-height: 100vh;
 }
 
-/* Remove default margins from common elements */
 h1, h2, h3, h4, h5, h6, p, ul, ol, li, button, input, textarea, select {
   margin: 0;
   padding: 0;
 }
 
-/* Ensure app container takes full viewport */
 app-root {
   display: block;
   min-height: 100vh;
   width: 100%;
 }
 
-/* Global button reset */
 button {
   border: none;
   background: none;
@@ -45,20 +39,17 @@ button {
   font-family: inherit;
 }
 
-/* Global input reset */
 input, textarea, select {
   border: none;
   outline: none;
   font-family: inherit;
 }
 
-/* Global link reset */
 a {
   text-decoration: none;
   color: inherit;
 }
 
-/* Global list reset */
 ul, ol {
   list-style: none;
 }

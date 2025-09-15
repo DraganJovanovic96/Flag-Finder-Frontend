@@ -2,7 +2,7 @@
   position: fixed;
   bottom: 20px;
   right: 20px;
-  z-index: 1050; /* Lower than invite modal but higher than other elements */
+  z-index: 1050;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -396,7 +396,6 @@
   }
 }
 
-// Confirmation Dialog Styles
 .confirm-dialog-backdrop {
   position: fixed;
   top: 0;
@@ -407,7 +406,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1200; /* Highest z-index for modal dialogs */
+  z-index: 1200;
   animation: fadeIn 0.2s ease-out;
 }
 

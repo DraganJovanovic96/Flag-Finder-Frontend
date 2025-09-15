@@ -111,7 +111,6 @@ export class SinglePlayerComponent implements OnInit {
     this.http.post<any>(`${BASIC_URL}games/start-single-player-game`, startGameRequest, { headers })
       .subscribe({
         next: (gameResponse) => {
-          // Navigate to single player game component
           this.router.navigate(['/single-player-game', this.singlePlayerRoom!.id]);
         },
         error: (error) => {

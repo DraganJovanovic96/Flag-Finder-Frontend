@@ -39,7 +39,7 @@ export class AuthService {
         if (res.access_token) {
           this.cookieService.setSessionCookie('access_token', res.access_token);
           if (res.refresh_token) {
-            this.cookieService.setCookie('refresh_token', res.refresh_token, false); // 30 days
+            this.cookieService.setCookie('refresh_token', res.refresh_token, false);
           }
           this.router.navigate(['/home']);
           return true;
@@ -119,7 +119,6 @@ export class AuthService {
     
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      // Prioritize gameName over other fields for room host comparison
       const gameName = payload.gameName || payload.sub || payload.username || '';
       
       return gameName;
