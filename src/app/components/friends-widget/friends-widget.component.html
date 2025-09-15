@@ -53,7 +53,9 @@
             <div class="friend-avatar">{{ (friend.friendName || 'U').charAt(0).toUpperCase() }}</div>
             <div class="friend-details">
               <div class="friend-name">{{ friend.friendName || 'Unknown' }}</div>
-              <div class="friend-status">Online</div>
+              <div class="friend-status" [class.online]="friend.isOnline" [class.offline]="!friend.isOnline">
+                {{ friend.isOnline ? 'Online' : 'Offline' }}
+              </div>
             </div>
           </div>
           <div class="friend-actions">
