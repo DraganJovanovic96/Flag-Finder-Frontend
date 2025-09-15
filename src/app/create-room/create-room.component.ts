@@ -74,8 +74,6 @@ export class CreateRoomComponent implements OnInit {
         next: (response) => {
           this.isLoading = false;
           
-          localStorage.setItem(`room_${response.id}_isHost`, 'true');
-          
           this.router.navigate(['/room', response.id]);
         },
         error: (error) => {

@@ -270,8 +270,6 @@ export class FriendsWidgetComponent implements OnInit, OnDestroy {
     this.http.post<any>(`${environment.apiUrl}rooms/create`, {}, { headers: this.getHeaders() })
       .subscribe({
         next: (roomResponse) => {
-          localStorage.setItem(`room_${roomResponse.id}_isHost`, 'true');
-          
           const inviteRequest = {
             friendUserName: friendName
           };

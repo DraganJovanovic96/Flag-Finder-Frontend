@@ -135,7 +135,6 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.route.params.subscribe(params => {
       this.roomId = params['id'];
       if (this.roomId) {
-        this.isHost = localStorage.getItem(`room_${this.roomId}_isHost`) === 'true';
         this.loadRoom();
         const handler = (roomUpdate: any) => {
           if (roomUpdate && roomUpdate.id && roomUpdate.id === this.roomId) {
@@ -214,7 +213,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       // Initialize selectedRounds from room data
       this.selectedRounds = this.room.numberOfRounds || 5;
       
-      // Set host status
+      // Set host status based on JWT token comparison with room data
       this.isHost = this.room.hostUserName === this.currentUsername;
     }
   }
@@ -364,13 +363,11 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.http.post(`${BASIC_URL}rooms/cancel`, {}, { headers })
       .subscribe({
         next: () => {
-          localStorage.removeItem(`room_${this.roomId}_isHost`);
           this.router.navigate(['/home']);
         },
         error: (error) => {
           this.errorMessage = 'Failed to leave room. Please try again.';
           setTimeout(() => {
-            localStorage.removeItem(`room_${this.roomId}_isHost`);
             this.router.navigate(['/home']);
           }, 2000);
         }

@@ -119,10 +119,10 @@ export class AuthService {
     
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const username = payload.gameName || payload.sub || payload.username || payload.email || '';
-  
+      // Prioritize gameName over other fields for room host comparison
+      const gameName = payload.gameName || payload.sub || payload.username || '';
       
-      return username;
+      return gameName;
     } catch (error) {
       return 'none';
     }
