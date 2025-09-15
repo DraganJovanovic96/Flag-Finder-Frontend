@@ -180,7 +180,8 @@
     </div>
   </div>
 
-  <div class="friend-invitation-section" *ngIf="isCurrentUserHost() && !room?.guestUserName">
+  <!-- Invitation Section (only when no guest) -->
+  <div class="invitation-section" *ngIf="isCurrentUserHost() && !room?.guestUserName">
     <h3>Invite a Friend</h3>
     <p>Invite a friend to join your game by entering their game name</p>
     
@@ -210,17 +211,12 @@
         <button 
           class="btn-primary" 
           (click)="inviteFriend()"
-          [disabled]="isInviting || !friendGameName.trim()"
-        >
+          [disabled]="!friendGameName || isInviting">
           <i class="fa fa-paper-plane" *ngIf="!isInviting"></i>
           <i class="fa fa-spinner fa-spin" *ngIf="isInviting"></i>
-          {{ isInviting ? 'Sending...' : 'Send Invitation' }}
+          {{ isInviting ? 'Sending...' : 'Send Invite' }}
         </button>
-        <button 
-          class="btn-secondary" 
-          (click)="toggleInviteForm()"
-          [disabled]="isInviting"
-        >
+        <button class="btn-secondary" (click)="toggleInviteForm()" [disabled]="isInviting">
           Cancel
         </button>
       </div>
@@ -231,6 +227,27 @@
           {{ inviteMessage }}
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Game Settings Section (always visible) -->
+  <div class="game-settings-section">
+    <h3>
+      <i class="fa fa-cog"></i>
+      Game Settings
+    </h3>
+    <div class="setting-item">
+      <label for="roundsSelect">Number of Rounds:</label>
+      <select 
+        id="roundsSelect" 
+        [(ngModel)]="selectedRounds" 
+        (change)="onRoundsChange()" 
+        class="rounds-dropdown"
+        [disabled]="!isHost || room?.status === 'GAME_IN_PROGRESS'">
+        <option *ngFor="let option of roundOptions" [value]="option.value">{{ option.label }}</option>
+      </select>
+      <small class="setting-note" *ngIf="!isHost">Only the host can change game settings</small>
+      <small class="setting-note" *ngIf="isHost && room?.status === 'GAME_IN_PROGRESS'">Cannot change settings during game</small>
     </div>
   </div>
 

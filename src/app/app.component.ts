@@ -1,11 +1,12 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { WebSocketService } from './services/websocket.service';
 import { AuthService } from './services/auth/auth.service';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { FriendsWidgetComponent } from './components/friends-widget/friends-widget.component';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -33,14 +34,37 @@ export class AppComponent implements OnInit {
   private closingTimeout: any;
   private friendResponseTimeout: any;
 
-  constructor(private wsService: WebSocketService, private http: HttpClient, private authService: AuthService) {}
+  showFriendsWidget = true;
+
+  constructor(
+    private wsService: WebSocketService, 
+    private http: HttpClient, 
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.setupWebSocketSubscriptions();
+    this.setupRouteListener();
     // Only connect WebSocket if user is authenticated
     if (this.authService.isAuthenticated()) {
       this.wsService.connect();
     }
+  }
+
+  private setupRouteListener(): void {
+    // Hide friends widget on login and auth-related pages
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event) => {
+      const navigationEnd = event as NavigationEnd;
+      const hiddenRoutes = ['/login', '/oauth2/callback', '/setup-gamename'];
+      this.showFriendsWidget = !hiddenRoutes.includes(navigationEnd.url) && this.authService.isAuthenticated();
+    });
+
+    // Initial check
+    const hiddenRoutes = ['/login', '/oauth2/callback', '/setup-gamename'];
+    this.showFriendsWidget = !hiddenRoutes.includes(this.router.url) && this.authService.isAuthenticated();
   }
 
   private setupWebSocketSubscriptions(): void {

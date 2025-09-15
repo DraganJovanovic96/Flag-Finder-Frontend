@@ -16,6 +16,7 @@ interface Room {
   hostUserName: string;
   guestUserName: string | null;
   status: string;
+  numberOfRounds: number;
   createdAt: string;
   updatedAt: string | null;
   deleted: boolean;
@@ -50,6 +51,16 @@ export class RoomComponent implements OnInit, OnDestroy {
   hostUserInfo: UserInfo | null = null;
   guestUserInfo: UserInfo | null = null;
   loadingUserInfo = false;
+
+  // Round selection properties
+  selectedRounds = 5;
+  roundOptions = [
+    { value: 3, label: '3 Rounds' },
+    { value: 5, label: '5 Rounds' },
+    { value: 10, label: '10 Rounds' },
+    { value: 15, label: '15 Rounds' },
+    { value: 20, label: '20 Rounds' }
+  ];
 
   availableContinents = [
     { value: 'ASIA', label: 'Asia', selected: false },
@@ -199,6 +210,13 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   setupRoom(): void {
+    if (this.room) {
+      // Initialize selectedRounds from room data
+      this.selectedRounds = this.room.numberOfRounds || 5;
+      
+      // Set host status
+      this.isHost = this.room.hostUserName === this.currentUsername;
+    }
   }
 
   loadRoom(): void {
@@ -477,6 +495,30 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   onContinentChange(): void {
+  }
+
+  onRoundsChange(): void {
+    if (!this.room) return;
+    
+    // Update the room's numberOfRounds via API
+    const updateRequest = {
+      numberOfRounds: this.selectedRounds
+    };
+    
+    this.http.put(`${BASIC_URL}rooms/${this.room.id}/rounds`, updateRequest, { 
+      headers: this.getAuthHeaders() 
+    }).subscribe({
+      next: (response: any) => {
+        if (this.room) {
+          this.room.numberOfRounds = this.selectedRounds;
+        }
+      },
+      error: (error) => {
+        console.error('Failed to update rounds:', error);
+        // Revert selection on error
+        this.selectedRounds = this.room?.numberOfRounds || 5;
+      }
+    });
   }
 
   toggleContinentSelection(): void {

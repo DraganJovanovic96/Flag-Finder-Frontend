@@ -139,10 +139,8 @@ export class FriendsWidgetComponent implements OnInit, OnDestroy {
           console.log('Friends loaded:', data);
           console.log('First friend object:', data[0]);
           
-          // Process friends to determine the correct friend name (not current user's name)
           const currentUserName = this.authService.getCurrentUserGameName();
           this.friends = (data || []).map((friendship: any) => {
-            // Determine which user is the friend (not the current user)
             const friendName = friendship.initiatorUserName === currentUserName 
               ? friendship.targetUserName 
               : friendship.initiatorUserName;
