@@ -33,6 +33,23 @@
       </div>
     </div>
 
+    <div class="rounds-selection">
+      <h3>Number of Rounds</h3>
+      <p>Choose how many rounds you want to play</p>
+      
+      <div class="rounds-grid">
+        <button 
+          *ngFor="let rounds of availableRounds"
+          class="rounds-btn"
+          [class.selected]="selectedRounds === rounds"
+          (click)="selectedRounds = rounds">
+          <span class="rounds-number">{{ rounds }}</span>
+          <span class="rounds-label">{{ rounds === 1 ? 'Round' : 'Rounds' }}</span>
+          <i class="fa fa-check check-icon" *ngIf="selectedRounds === rounds"></i>
+        </button>
+      </div>
+    </div>
+
     <div class="action-section">
       <button 
         class="create-room-btn"
@@ -65,7 +82,7 @@
         </div>
         <div class="detail-item">
           <i class="fa fa-clock"></i>
-          <span>3 Rounds • 8 seconds each</span>
+          <span>{{ selectedRounds }} {{ selectedRounds === 1 ? 'Round' : 'Rounds' }} • 8 seconds each</span>
         </div>
       </div>
     </div>

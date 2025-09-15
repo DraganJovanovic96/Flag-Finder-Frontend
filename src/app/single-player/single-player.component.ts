@@ -23,6 +23,7 @@ interface SinglePlayerRoom {
 })
 export class SinglePlayerComponent implements OnInit {
   selectedContinents: string[] = [];
+  selectedRounds: number = 5;
   availableContinents = [
     { value: 'EUROPE', label: 'Europe', flag: '🌍' },
     { value: 'ASIA', label: 'Asia', flag: '🌏' },
@@ -32,6 +33,7 @@ export class SinglePlayerComponent implements OnInit {
     { value: 'OCEANIA', label: 'Oceania', flag: '🌏' },
     { value: 'USA_STATE', label: 'USA States', flag: '🇺🇸' }
   ];
+  availableRounds = [3, 5, 10, 15, 20];
   
   isCreatingRoom = false;
   isStartingGame = false;
@@ -73,7 +75,8 @@ export class SinglePlayerComponent implements OnInit {
       .set('Accept', '*/*');
 
     const roomRequest = {
-      continents: this.selectedContinents.length > 0 ? this.selectedContinents : null
+      continents: this.selectedContinents.length > 0 ? this.selectedContinents : null,
+      numberOfRounds: this.selectedRounds
     };
 
     this.http.post<SinglePlayerRoom>(`${BASIC_URL}rooms/create-single-player-room`, roomRequest, { headers })
@@ -101,7 +104,8 @@ export class SinglePlayerComponent implements OnInit {
 
     const startGameRequest = {
       roomId: this.singlePlayerRoom.id,
-      continents: this.selectedContinents.length > 0 ? this.selectedContinents : null
+      continents: this.selectedContinents.length > 0 ? this.selectedContinents : null,
+      numberOfRounds: this.selectedRounds
     };
 
     this.http.post<any>(`${BASIC_URL}games/start-single-player-game`, startGameRequest, { headers })
