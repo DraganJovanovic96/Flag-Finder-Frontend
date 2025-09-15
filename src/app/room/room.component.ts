@@ -494,6 +494,11 @@ export class RoomComponent implements OnInit, OnDestroy {
     return result;
   }
 
+  getDisplayedBestStreak(userInfo: UserInfo | null): string {
+    const result = userInfo?.bestStreak !== undefined ? userInfo.bestStreak.toString() : '0';
+    return result;
+  }
+
   onContinentChange(): void {
   }
 

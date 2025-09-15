@@ -8,7 +8,7 @@ export interface UserInfo {
   userName: string;
   numberOfWonGame?: number;
   accuracyPercentage?: number;
-  averageTime?: number;
+  bestStreak?: number;
 }
 
 @Injectable({
