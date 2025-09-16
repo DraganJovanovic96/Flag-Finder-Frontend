@@ -1,0 +1,63 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="error-message" *ngIf="errorMessage">
+      <i class="fa fa-exclamation-circle"></i>
+      {{ errorMessage }}
+    </div>
+
+    <div class="login-header">
+      <h1>Welcome Back</h1>
+      <p>Sign in to your FlagFinder account</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email" 
+          placeholder="Enter your email"
+          autocomplete="email"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          formControlName="password" 
+          placeholder="Enter your password"
+          autocomplete="current-password"
+        >
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-login" [disabled]="isLoading">
+          <i class="fa fa-sign-in-alt" *ngIf="!isLoading"></i>
+          <i class="fa fa-spinner fa-spin" *ngIf="isLoading"></i>
+          {{ isLoading ? 'Signing In...' : 'Sign In' }}
+        </button>
+      </div>
+    </form>
+
+    <div class="divider">
+      <span>or</span>
+    </div>
+
+    <div class="oauth-section">
+      <button type="button" class="btn-google" (click)="loginWithGoogle()" [disabled]="isLoading">
+        <i class="fab fa-google"></i>
+        Continue with Google
+      </button>
+    </div>
+
+    <div class="login-footer">
+      <div class="footer-links">
+        <a routerLink="/forgotten-password">Forgot Password?</a>
+      </div>
+      <p class="footer-text">Don't have an account? Contact your administrator</p>
+    </div>
+  </div>
+</div>

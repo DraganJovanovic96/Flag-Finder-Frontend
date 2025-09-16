@@ -1,0 +1,331 @@
+<div class="game-container">
+  <!-- Game Start Countdown -->
+  <div *ngIf="showStartCountdown" class="countdown-overlay">
+    <div class="countdown-circle">
+      <div class="countdown-text" [class.go-text]="startCountdown <= 0">
+        {{ getCountdownText() }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading && !showStartCountdown" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Starting game...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    <p>{{ errorMessage }}</p>
+    <button (click)="router.navigate(['/home'])" class="back-button">
+      Back to Rooms
+    </button>
+  </div>
+
+  <!-- Single Player End Screen -->
+  <div *ngIf="game && game.playerName && game.status === 'COMPLETED'" class="game-end-container">
+    <div class="game-end-content">
+      <h2 class="game-end-title">🎉 Game Completed! 🎉</h2>
+      <div class="winner-announcement">
+        {{ getSinglePlayerEndMessage() }}
+      </div>
+      
+      <!-- Rounds Summary Table -->
+      <div class="rounds-summary">
+        <h3 class="rounds-title">Round Results</h3>
+        <div class="rounds-table">
+          <div class="rounds-header">
+            <div class="round-column">Round</div>
+            <div class="country-column">Country</div>
+            <div class="host-guess-column">{{ getSinglePlayerGameName() | uppercase }}</div>
+          </div>
+          
+          <div class="round-row" *ngFor="let round of singlePlayerRounds; let i = index">
+            <div class="round-number-cell">
+              {{ i + 1 }}
+            </div>
+            
+            <div class="country-cell">
+              <div class="country-info">
+                <img 
+                  [src]="getRoundFlagUrl(round.country.id)" 
+                  [alt]="round.country.nameOfCounty + ' flag'"
+                  class="round-flag"
+                  onerror="this.style.display='none'"
+                />
+                <span class="country-name">{{ round.country.nameOfCounty }}</span>
+              </div>
+            </div>
+            
+            <div class="guess-cell">
+              <ng-container *ngFor="let guess of round.guesses">
+                <div class="guess-result">
+                  <div class="guess-status" [class.correct]="guess.correct" [class.incorrect]="!guess.correct">
+                    <i class="fa" [class.fa-check]="guess.correct" [class.fa-times]="!guess.correct"></i>
+                  </div>
+                  <div *ngIf="!guess.correct" class="guessed-country">{{ guess.guessedCountryName }}</div>
+                </div>
+              </ng-container>
+              <div *ngIf="round.guesses.length === 0" class="guess-result">
+                <div class="guess-status incorrect">
+                  <i class="fa fa-times"></i>
+                </div>
+                <div class="no-guess">No guess</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Show message if no rounds data -->
+          <div *ngIf="singlePlayerRounds.length === 0" class="no-rounds-message">
+            <p>Round details not available</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Final Score Cards -->
+      <div class="final-scores-cards">
+        <div class="score-card winner-card">
+          <div class="player-avatar">
+            <i class="fa fa-user"></i>
+          </div>
+          <div class="player-info">
+            <h4 class="player-name">{{ getSinglePlayerGameName() }}</h4>
+            <div class="player-score">{{ game.hostScore }}</div>
+            <div class="score-label">points</div>
+          </div>
+          <div class="crown">
+            <i class="fa fa-crown"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="button-container">
+        <button (click)="router.navigate(['/home'])" class="nav-btn">
+          <i class="fa fa-home"></i>
+          Home
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Multiplayer End Screen -->
+  <div *ngIf="game && !game.playerName && game.status === 'COMPLETED'" class="game-end-container">
+    <div class="game-end-content">
+      <h2 class="game-end-title">🎉 Game Completed! 🎉</h2>
+      <div class="winner-announcement">
+        {{ getWinnerMessage() }}
+      </div>
+      
+      <!-- Rounds Summary Table -->
+      <div class="rounds-summary" *ngIf="gameRounds.length > 0">
+        <h3 class="rounds-title">Round Results</h3>
+        <div class="rounds-table">
+          <div class="rounds-header">
+            <div class="round-column">Round</div>
+            <div class="country-column">Country</div>
+            <div class="host-guess-column">{{ game.hostName | uppercase }}</div>
+            <div class="guest-guess-column">{{ game.guestName | uppercase}}</div>
+          </div>
+          
+          <div class="round-row" *ngFor="let round of gameRounds; let i = index">
+            <div class="round-number-cell">
+              {{ i + 1 }}
+            </div>
+            
+            <div class="country-cell">
+              <div class="country-info">
+                <img 
+                  [src]="getRoundFlagUrl(round.country.id)" 
+                  [alt]="round.country.nameOfCounty + ' flag'"
+                  class="round-flag"
+                  onerror="this.style.display='none'"
+                />
+                <span class="country-name">{{ round.country.nameOfCounty }}</span>
+              </div>
+            </div>
+            
+            <div class="guess-cell">
+              <ng-container *ngFor="let guess of round.guesses">
+                <div *ngIf="guess.userGameName === game.hostName" class="guess-result">
+                  <div class="guess-status" [class.correct]="guess.correct" [class.incorrect]="!guess.correct">
+                    <i class="fa" [class.fa-check]="guess.correct" [class.fa-times]="!guess.correct"></i>
+                  </div>
+                  <div *ngIf="!guess.correct" class="guessed-country">{{ guess.guessedCountryName }}</div>
+                </div>
+              </ng-container>
+              <div *ngIf="!hasGuessForPlayer(round, game.hostName || '')" class="guess-result">
+                <div class="guess-status incorrect">
+                  <i class="fa fa-times"></i>
+                </div>
+                <div class="no-guess">No guess</div>
+              </div>
+            </div>
+            
+            <div class="guess-cell">
+              <ng-container *ngFor="let guess of round.guesses">
+                <div *ngIf="guess.userGameName === game.guestName" class="guess-result">
+                  <div class="guess-status" [class.correct]="guess.correct" [class.incorrect]="!guess.correct">
+                    <i class="fa" [class.fa-check]="guess.correct" [class.fa-times]="!guess.correct"></i>
+                  </div>
+                  <div *ngIf="!guess.correct" class="guessed-country">{{ guess.guessedCountryName }}</div>
+                </div>
+              </ng-container>
+              <div *ngIf="!hasGuessForPlayer(round, game.guestName || '')" class="guess-result">
+                <div class="guess-status incorrect">
+                  <i class="fa fa-times"></i>
+                </div>
+                <div class="no-guess">No guess</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Final Score Cards -->
+      <div class="final-scores-cards">
+        <div class="score-card" [class.winner-card]="game.hostScore > (game.guestScore || 0)">
+          <div class="player-avatar">
+            <i class="fa fa-user"></i>
+          </div>
+          <div class="player-info">
+            <h4 class="player-name">{{ game.hostName }}</h4>
+            <div class="player-score">{{ game.hostScore }}</div>
+            <div class="score-label">points</div>
+          </div>
+          <div class="crown" *ngIf="game.hostScore > (game.guestScore || 0)">
+            <i class="fa fa-crown"></i>
+          </div>
+        </div>
+        
+        <div class="score-card" [class.winner-card]="(game.guestScore || 0) > game.hostScore">
+          <div class="player-avatar">
+            <i class="fa fa-user"></i>
+          </div>
+          <div class="player-info">
+            <h4 class="player-name">{{ game.guestName }}</h4>
+            <div class="player-score">{{ game.guestScore || 0 }}</div>
+            <div class="score-label">points</div>
+          </div>
+          <div class="crown" *ngIf="(game.guestScore || 0) > game.hostScore">
+            <i class="fa fa-crown"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="button-container">
+        <button (click)="router.navigate(['/home'])" class="nav-btn">
+          <i class="fa fa-home"></i>
+          Home
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Interface -->
+  <div *ngIf="game && (game.currentRoundData || game.currentSinglePlayerRoundData) && !showStartCountdown && !isLoading && game.status !== 'COMPLETED'" class="game-interface">
+    <!-- Game Header -->
+    <div class="game-header" *ngIf="game.status !== 'COMPLETED'">
+      <div class="players-info">
+        <!-- Single Player Mode -->
+        <div *ngIf="game.playerName" class="player single-player">
+          <div class="player-name">{{ getSinglePlayerGameName() }}</div>
+          <div class="player-score">
+            <span class="score-number">{{ game.hostScore }}</span>
+          </div>
+        </div>
+        
+        <!-- Multiplayer Mode -->
+        <ng-container *ngIf="!game.playerName">
+          <div class="player host">
+            <div class="player-name">{{ game.hostName }}</div>
+            <div class="player-score">
+              <span class="score-number">{{ game.hostScore }}</span>
+            </div>
+          </div>
+          
+          <div class="vs-divider">VS</div>
+          
+          <div class="player guest">
+            <div class="player-name">{{ game.guestName }}</div>
+            <div class="player-score">
+              <span class="score-number">{{ game.guestScore }}</span>
+            </div>          
+          </div>
+        </ng-container>
+      </div>
+      
+      <div class="round-info">
+        <span class="round-text">Round {{ game.currentRound }} / {{ game.totalRounds }}</span>
+      </div>
+    </div>
+
+    <!-- Round Timer (hidden when game is completed) -->
+    <div class="round-timer-container" *ngIf="game.status !== 'COMPLETED'">
+      <div class="round-timer" [class.timer-warning]="roundTimeRemaining <= 5">
+        <div class="timer-circle">
+          <div class="timer-text">{{ roundTimeRemaining }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flag Display -->
+    <div class="flag-container" *ngIf="(game.currentRoundData || game.currentSinglePlayerRoundData) && game.status === 'IN_PROGRESS'">
+      <div class="flag-wrapper">
+        <img 
+          [src]="getFlagImageSrc()" 
+          alt="Country Flag" 
+          class="flag-image"
+          *ngIf="getFlagImageSrc()"
+          (error)="onImageError($event)"
+          (load)="onImageLoad($event)"
+        />
+        <div *ngIf="!getFlagImageSrc()" class="flag-placeholder">
+          <span>🏳️</span>
+        </div>
+      </div>
+      
+      <div class="guess-section">
+        <div class="guess-input-container">
+          <div class="autocomplete-wrapper">
+            <input 
+              #guessInput
+              type="text" 
+              [(ngModel)]="userGuess" 
+              placeholder="Enter country name..."
+              class="guess-input"
+              [disabled]="isSubmittingGuess || roundTimeRemaining <= 0"
+              (input)="onGuessInput()"
+              (keydown)="onKeyDown($event)"
+              (keyup.enter)="submitGuess()"
+              (focusout)="onFocusOut()"
+            />
+            <div *ngIf="showSuggestions" class="suggestions-dropdown">
+              <div 
+                *ngFor="let country of countrySuggestions; let i = index"
+                class="suggestion-item"
+                [class.selected]="i === selectedSuggestionIndex"
+                (mousedown)="selectSuggestion(country)"
+              >
+                <span class="country-english">{{ country.englishName }}</span>
+                <span *ngIf="country.serbianName" class="country-serbian">({{ country.serbianName }})</span>
+              </div>
+            </div>
+          </div>
+          <button 
+            (click)="submitGuess()" 
+            class="submit-guess-btn"
+            [disabled]="!userGuess.trim() || isSubmittingGuess || roundTimeRemaining <= 0"
+          >
+            <span *ngIf="!isSubmittingGuess">Submit</span>
+            <span *ngIf="isSubmittingGuess">...</span>
+          </button>
+        </div>
+        
+        <div *ngIf="guessMessage" class="guess-message" [class.correct]="isGuessCorrect === true" [class.incorrect]="isGuessCorrect === false">
+          {{ guessMessage }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

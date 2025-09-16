@@ -1,0 +1,111 @@
+<div class="single-player-container">
+  <header class="page-header">
+    <div class="header-top">
+      <button class="back-btn" (click)="goBack()" title="Go back">
+        <i class="fa fa-arrow-left"></i>
+      </button>
+      <h1 class="clickable-title" (click)="goBack()">🎯 Solo Practice</h1>
+      <div class="header-spacer"></div>
+    </div>
+    <p>Practice your flag knowledge at your own pace</p>
+  </header>
+
+  <!-- Step 1: Room Creation -->
+  <div *ngIf="!singlePlayerRoom" class="setup-section">
+    <div class="continent-selection">
+      <h3>Choose Your Challenge</h3>
+      <p>Select continents to focus on, or leave blank for worldwide flags</p>
+      
+      <div class="continent-grid">
+        <button 
+          *ngFor="let continent of availableContinents"
+          class="continent-btn"
+          [class.selected]="isContinentSelected(continent.value)"
+          (click)="toggleContinent(continent.value)">
+          <span class="continent-flag">{{ continent.flag }}</span>
+          <span class="continent-name">{{ continent.label }}</span>
+          <i class="fa fa-check check-icon" *ngIf="isContinentSelected(continent.value)"></i>
+        </button>
+      </div>
+
+      <div class="selection-summary">
+        <strong>Selected: </strong>{{ getContinentDisplayText() }}
+      </div>
+    </div>
+
+    <div class="rounds-selection">
+      <h3>Number of Rounds</h3>
+      <p>Choose how many rounds you want to play</p>
+      
+      <div class="rounds-grid">
+        <button 
+          *ngFor="let rounds of availableRounds"
+          class="rounds-btn"
+          [class.selected]="selectedRounds === rounds"
+          (click)="selectedRounds = rounds">
+          <span class="rounds-number">{{ rounds }}</span>
+          <span class="rounds-label">{{ rounds === 1 ? 'Round' : 'Rounds' }}</span>
+          <i class="fa fa-check check-icon" *ngIf="selectedRounds === rounds"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="action-section">
+      <button 
+        class="create-room-btn"
+        [disabled]="isCreatingRoom"
+        (click)="createSinglePlayerRoom()">
+        <i class="fa fa-plus" *ngIf="!isCreatingRoom"></i>
+        <i class="fa fa-spinner fa-spin" *ngIf="isCreatingRoom"></i>
+        {{ isCreatingRoom ? 'Creating Room...' : 'Start Solo Practice' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 2: Room Created - Start Game -->
+  <div *ngIf="singlePlayerRoom" class="room-ready-section">
+    <div class="room-info">
+      <div class="success-icon">
+        <i class="fa fa-check-circle"></i>
+      </div>
+      <h3>Practice Room Ready!</h3>
+      <p>Your solo practice session is set up and ready to begin</p>
+      
+      <div class="room-details">
+        <div class="detail-item">
+          <i class="fa fa-user"></i>
+          <span>Player: {{ singlePlayerRoom.hostName }}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fa fa-globe"></i>
+          <span>Challenge: {{ getContinentDisplayText() }}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fa fa-clock"></i>
+          <span>{{ selectedRounds }} {{ selectedRounds === 1 ? 'Round' : 'Rounds' }} • 8 seconds each</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="start-game-section">
+      <button 
+        class="start-game-btn"
+        [disabled]="isStartingGame"
+        (click)="startSinglePlayerGame()">
+        <i class="fa fa-play" *ngIf="!isStartingGame"></i>
+        <i class="fa fa-spinner fa-spin" *ngIf="isStartingGame"></i>
+        {{ isStartingGame ? 'Starting Game...' : 'Begin Practice' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    <i class="fa fa-exclamation-triangle"></i>
+    <span>{{ errorMessage }}</span>
+    <button (click)="errorMessage = null" class="dismiss-btn">
+      <i class="fa fa-times"></i>
+    </button>
+  </div>
+
+</div>
