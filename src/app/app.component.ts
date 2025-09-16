@@ -1,14 +1,17 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { WebSocketService } from './services/websocket.service';
+import { AuthService } from './services/auth/auth.service';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../environments/environment';
+import { FriendsWidgetComponent } from './components/friends-widget/friends-widget.component';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, FriendsWidgetComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
@@ -21,19 +24,59 @@ export class AppComponent implements OnInit {
     targetUserName: string; 
     gameId: string;
   } | null = null;
+  friendResponse: {
+    username: string;
+    accepted: boolean;
+    message: string;
+  } | null = null;
   isClosing = false;
+  isFriendResponseClosing = false;
   private closingTimeout: any;
+  private friendResponseTimeout: any;
 
-  constructor(private wsService: WebSocketService, private http: HttpClient) {
+  showFriendsWidget = true;
+
+  constructor(
+    private wsService: WebSocketService, 
+    private http: HttpClient, 
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.setupWebSocketSubscriptions();
+    this.setupRouteListener();
+    if (this.authService.isAuthenticated()) {
+      this.wsService.connect();
+    }
+  }
+
+  private setupRouteListener(): void {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event) => {
+      const navigationEnd = event as NavigationEnd;
+      const hiddenRoutes = ['/login', '/oauth2/callback', '/setup-gamename'];
+      this.showFriendsWidget = !hiddenRoutes.includes(navigationEnd.url) && this.authService.isAuthenticated();
+    });
+
+    const hiddenRoutes = ['/login', '/oauth2/callback', '/setup-gamename'];
+    this.showFriendsWidget = !hiddenRoutes.includes(this.router.url) && this.authService.isAuthenticated();
+  }
+
+  private setupWebSocketSubscriptions(): void {
     this.wsService.invites$.subscribe((invite) => {
       if (invite?.initiatorUserName) {
         this.showInvite(invite);
       }
     });
-  }
 
-  ngOnInit(): void {
-    this.wsService.connect();
+
+    this.wsService.friendResponse$.subscribe((response) => {
+      if (response?.username) {
+        this.showFriendResponse(response);
+      }
+    });
   }
 
   private showInvite(invite: any): void {
@@ -85,5 +128,40 @@ export class AppComponent implements OnInit {
 
   declineInvite(): void {
     this.dismissInvite();
+  }
+
+
+  private showFriendResponse(response: any): void {
+    if (this.friendResponseTimeout) {
+      clearTimeout(this.friendResponseTimeout);
+      this.friendResponseTimeout = null;
+    }
+    
+    this.isFriendResponseClosing = false;
+    this.friendResponse = response;
+    
+    this.friendResponseTimeout = setTimeout(() => {
+      this.dismissFriendResponse();
+    }, 5000);
+  }
+
+  private dismissFriendResponse(): void {
+    if (!this.friendResponse) return;
+    
+    this.isFriendResponseClosing = true;
+    
+    setTimeout(() => {
+      this.friendResponse = null;
+      this.isFriendResponseClosing = false;
+      
+      if (this.friendResponseTimeout) {
+        clearTimeout(this.friendResponseTimeout);
+        this.friendResponseTimeout = null;
+      }
+    }, 300);
+  }
+
+  dismissFriendResponseManually(): void {
+    this.dismissFriendResponse();
   }
 }

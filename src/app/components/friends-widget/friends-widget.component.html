@@ -1,0 +1,142 @@
+<div class="friends-widget">
+  <!-- Toggle Button -->
+  <button class="friends-toggle" (click)="toggleWidget()" [class.active]="isOpen">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H16c-.8 0-1.54.37-2 .97L12.58 11H9v2h4.58l1.42-2.42c.1-.17.26-.29.44-.36L17.5 18H20zM12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5zM5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89-2 2 .89 2 2 2zm1.5 2h-3C2.67 8 2 8.67 2 10v3h2v7h4v-7h2v-3c0-1.33-.67-2-1.5-2z"/>
+    </svg>
+    <span class="friend-count" *ngIf="friendRequests.length > 0">{{ friendRequests.length }}</span>
+  </button>
+
+  <!-- Friends Panel -->
+  <div class="friends-panel" *ngIf="isOpen" (click)="$event.stopPropagation()">
+    <div class="panel-header">
+      <h3>Friends</h3>
+      <button class="close-btn" (click)="toggleWidget()">×</button>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="error" (click)="clearError()">
+      {{ error }}
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'friends'"
+        (click)="setActiveTab('friends')">
+        Friends ({{ friends.length }})
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'requests'"
+        (click)="setActiveTab('requests')">
+        Requests ({{ friendRequests.length }})
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab === 'add'"
+        (click)="setActiveTab('add')">
+        Add Friend
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      <!-- Friends List -->
+      <div *ngIf="activeTab === 'friends'" class="friends-list">
+        <div *ngIf="friends.length === 0" class="empty-state">
+          No friends yet
+        </div>
+        <div *ngFor="let friend of friends" class="friend-item">
+          <div class="friend-info" (click)="inviteToGame(friend.friendName)" title="Click to invite to game">
+            <div class="friend-avatar">{{ (friend.friendName || 'U').charAt(0).toUpperCase() }}</div>
+            <div class="friend-details">
+              <div class="friend-name">{{ friend.friendName || 'Unknown' }}</div>
+              <div class="friend-status" [class.online]="friend.isOnline" [class.offline]="!friend.isOnline">
+                {{ friend.isOnline ? 'Online' : 'Offline' }}
+              </div>
+            </div>
+          </div>
+          <div class="friend-actions">
+            <button class="action-btn remove" (click)="removeFriend(friend.friendName)" title="Remove friend">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Friend Requests -->
+      <div *ngIf="activeTab === 'requests'" class="requests-list">
+        <div *ngIf="friendRequests.length === 0" class="empty-state">
+          No pending requests
+        </div>
+        <div *ngFor="let request of friendRequests" class="request-item">
+          <div class="request-info">
+            <div class="friend-avatar">{{ (request.username || request.initiatorUserName || request.targetUserName || 'U').charAt(0).toUpperCase() }}</div>
+            <div class="request-details">
+              <div class="request-name">{{ request.username || request.initiatorUserName || request.targetUserName || 'Unknown' }}</div>
+              <div class="request-message" *ngIf="request.message">{{ request.message }}</div>
+              <div class="request-time">{{ request.createdAt | date:'short' }}</div>
+            </div>
+          </div>
+          <div class="request-actions">
+            <button class="action-btn decline" (click)="respondToRequest(request.username || request.initiatorUserName || request.targetUserName, false)" title="Decline">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+            <button class="action-btn accept" (click)="respondToRequest(request.username || request.initiatorUserName || request.targetUserName, true)" title="Accept">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Friend -->
+      <div *ngIf="activeTab === 'add'" class="add-friend">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input 
+            id="username"
+            type="text" 
+            [(ngModel)]="newFriendUsername" 
+            placeholder="Enter username"
+            [disabled]="isLoading"
+            class="form-input"
+            (keydown.enter)="sendFriendRequest()">
+        </div>
+        <button 
+          class="send-btn" 
+          (click)="sendFriendRequest()" 
+          [disabled]="isLoading || !newFriendUsername.trim()">
+          {{ isLoading ? 'Sending...' : 'Send Request' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Dialog -->
+<div class="confirm-dialog-backdrop" *ngIf="confirmDialog.show" (click)="cancelRemoveFriend()">
+  <div class="confirm-dialog" (click)="$event.stopPropagation()">
+    <div class="confirm-header">
+      <h4>Remove Friend</h4>
+    </div>
+    <div class="confirm-body">
+      <p>Are you sure you want to remove <strong>{{ confirmDialog.friendName }}</strong> from your friends list?</p>
+      <p class="confirm-note">This action cannot be undone.</p>
+    </div>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="cancelRemoveFriend()">Cancel</button>
+      <button class="btn-confirm" (click)="confirmRemoveFriend()">Remove Friend</button>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop -->
+<div class="friends-backdrop" *ngIf="isOpen" (click)="toggleWidget()"></div>

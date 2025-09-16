@@ -10,7 +10,7 @@ export class CookieService {
     
     if (!isSession) {
       const expires = new Date();
-      expires.setTime(expires.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days
+      expires.setTime(expires.getTime() + (30 * 24 * 60 * 60 * 1000));
       cookieValue += `;expires=${expires.toUTCString()}`;
     }
     

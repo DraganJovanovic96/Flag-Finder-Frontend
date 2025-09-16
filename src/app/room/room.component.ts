@@ -16,6 +16,7 @@ interface Room {
   hostUserName: string;
   guestUserName: string | null;
   status: string;
+  numberOfRounds: number;
   createdAt: string;
   updatedAt: string | null;
   deleted: boolean;
@@ -50,6 +51,15 @@ export class RoomComponent implements OnInit, OnDestroy {
   hostUserInfo: UserInfo | null = null;
   guestUserInfo: UserInfo | null = null;
   loadingUserInfo = false;
+
+  selectedRounds = 5;
+  roundOptions = [
+    { value: 3, label: '3 Rounds' },
+    { value: 5, label: '5 Rounds' },
+    { value: 10, label: '10 Rounds' },
+    { value: 15, label: '15 Rounds' },
+    { value: 20, label: '20 Rounds' }
+  ];
 
   availableContinents = [
     { value: 'ASIA', label: 'Asia', selected: false },
@@ -124,7 +134,6 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.route.params.subscribe(params => {
       this.roomId = params['id'];
       if (this.roomId) {
-        this.isHost = localStorage.getItem(`room_${this.roomId}_isHost`) === 'true';
         this.loadRoom();
         const handler = (roomUpdate: any) => {
           if (roomUpdate && roomUpdate.id && roomUpdate.id === this.roomId) {
@@ -199,6 +208,11 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   setupRoom(): void {
+    if (this.room) {
+      this.selectedRounds = this.room.numberOfRounds || 5;
+      
+      this.isHost = this.room.hostUserName === this.currentUsername;
+    }
   }
 
   loadRoom(): void {
@@ -346,13 +360,11 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.http.post(`${BASIC_URL}rooms/cancel`, {}, { headers })
       .subscribe({
         next: () => {
-          localStorage.removeItem(`room_${this.roomId}_isHost`);
           this.router.navigate(['/home']);
         },
         error: (error) => {
           this.errorMessage = 'Failed to leave room. Please try again.';
           setTimeout(() => {
-            localStorage.removeItem(`room_${this.roomId}_isHost`);
             this.router.navigate(['/home']);
           }, 2000);
         }
@@ -476,7 +488,33 @@ export class RoomComponent implements OnInit, OnDestroy {
     return result;
   }
 
+  getDisplayedBestStreak(userInfo: UserInfo | null): string {
+    const result = userInfo?.bestStreak !== undefined ? userInfo.bestStreak.toString() : '0';
+    return result;
+  }
+
   onContinentChange(): void {
+  }
+
+  onRoundsChange(): void {
+    if (!this.room) return;
+    
+    const updateRequest = {
+      numberOfRounds: this.selectedRounds
+    };
+    
+    this.http.put(`${BASIC_URL}rooms/${this.room.id}/rounds`, updateRequest, { 
+      headers: this.getAuthHeaders() 
+    }).subscribe({
+      next: (response: any) => {
+        if (this.room) {
+          this.room.numberOfRounds = this.selectedRounds;
+        }
+      },
+      error: (error) => {
+        this.selectedRounds = this.room?.numberOfRounds || 5;
+      }
+    });
   }
 
   toggleContinentSelection(): void {

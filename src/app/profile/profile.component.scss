@@ -562,7 +562,6 @@
   }
 }
 
-// View toggle buttons
 .view-toggle {
   display: flex;
   gap: 10px;
@@ -599,7 +598,6 @@
   }
 }
 
-// Table view styles
 .table-view {
   .game-table {
     background: white;
@@ -1037,13 +1035,11 @@
   }
 
   .bottom-nav {
-    flex-direction: column;
     gap: 0.75rem;
     margin-top: 2rem;
     padding: 1rem;
 
     .nav-btn {
-      width: 100%;
       padding: 0.875rem 1rem;
     }
   }
@@ -1164,7 +1160,6 @@
   }
 }
 
-// Mobile responsive styles for header
 @media (max-width: 768px) {
   .page-header {
     .header-top {

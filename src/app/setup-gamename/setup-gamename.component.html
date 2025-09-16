@@ -1,0 +1,133 @@
+<div class="setup-container">
+  <div class="setup-card">
+    <div class="content-wrapper">
+      <div class="left-section">
+        <div class="header">
+          <div class="icon-wrapper">
+            <i class="fa fa-user-circle"></i>
+          </div>
+          <h1>Welcome to FlagFinder!</h1>
+          <p>Let's set up your player identity</p>
+        </div>
+
+        <div class="current-name-section">
+          <div class="current-name-card">
+            <div class="card-header">
+              <i class="fa fa-id-badge"></i>
+              <span>Current User Name</span>
+            </div>
+            <div class="name-display">{{ currentGameName }}</div>
+            <div class="card-subtitle">This was generated from your Google profile</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-section">
+        <div class="customization-panel">
+          <h3><i class="fa fa-edit"></i> Customize (Optional)</h3>
+          <p class="main-description">Want something more personal? Create your own unique user name!</p>
+          
+          <div class="info-points">
+            <div class="info-point">
+              <span>Pick a name you love! Usernames are permanent and can't be changed later.</span>
+            </div>
+            <div class="info-point">
+              <span>This name will be visible to other players</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="input-wrapper">
+              <input 
+                type="text" 
+                id="gameName"
+                [(ngModel)]="newGameName"
+                (input)="onGameNameChange()"
+                (keyup.enter)="updateGameName()"
+                placeholder="Enter your preferred user name..."
+                [class.error]="errorMessage"
+                [class.success]="isAvailable && newGameName.length >= 3"
+                maxlength="20"
+                autocomplete="off">
+              
+              <div class="input-status" *ngIf="newGameName.length > 0">
+                <div *ngIf="isChecking" class="status checking">
+                  <i class="fa fa-spinner fa-spin"></i>
+                </div>
+                <div *ngIf="!isChecking && newGameName.length >= 3 && isAvailable" class="status success">
+                  <i class="fa fa-check-circle"></i>
+                </div>
+                <div *ngIf="!isChecking && newGameName.length >= 3 && !isAvailable" class="status error">
+                  <i class="fa fa-times-circle"></i>
+                </div>
+              </div>
+            </div>
+            
+            <div class="input-feedback" *ngIf="newGameName.length > 0">
+              <div *ngIf="isChecking" class="feedback checking">
+                <i class="fa fa-spinner fa-spin"></i>
+                Checking availability...
+              </div>
+              <div *ngIf="!isChecking && newGameName.length >= 3 && isAvailable" class="feedback success">
+                <i class="fa fa-check"></i>
+                Perfect! This name is available
+              </div>
+              <div *ngIf="!isChecking && newGameName.length >= 3 && !isAvailable" class="feedback error">
+                <i class="fa fa-times"></i>
+                This name is already taken
+              </div>
+              <div *ngIf="newGameName.length > 0 && newGameName.length < 3" class="feedback warning">
+                <i class="fa fa-info-circle"></i>
+                Name must be at least 3 characters
+              </div>
+              <div *ngIf="!isValidFormat && newGameName.length > 0" class="feedback error">
+                <i class="fa fa-exclamation-triangle"></i>
+                Only letters, numbers, and underscores allowed
+              </div>
+            </div>
+          </div>
+
+          <div class="requirements-grid" *ngIf="newGameName.length > 0">
+            <div class="requirement" [class.met]="newGameName.length >= 3 && newGameName.length <= 20">
+              <i class="fa" [class.fa-check-circle]="newGameName.length >= 3 && newGameName.length <= 20" [class.fa-circle]="!(newGameName.length >= 3 && newGameName.length <= 20)"></i>
+              <span>3-20 characters</span>
+            </div>
+            <div class="requirement" [class.met]="isValidFormat">
+              <i class="fa" [class.fa-check-circle]="isValidFormat" [class.fa-circle]="!isValidFormat"></i>
+              <span>Valid format</span>
+            </div>
+            <div class="requirement" [class.met]="isAvailable && newGameName.length >= 3">
+              <i class="fa" [class.fa-check-circle]="isAvailable && newGameName.length >= 3" [class.fa-circle]="!(isAvailable && newGameName.length >= 3)"></i>
+              <span>Unique name</span>
+            </div>
+          </div>
+
+          <div *ngIf="errorMessage" class="error-banner">
+            <i class="fa fa-exclamation-triangle"></i>
+            <span>{{ errorMessage }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button 
+        class="btn-secondary"
+        [disabled]="isSubmitting"
+        (click)="skipCustomization()">
+        <i class="fa fa-arrow-right"></i>
+        Keep "{{ currentGameName }}"
+      </button>
+      
+      <button 
+        class="btn-primary"
+        [disabled]="!canUpdate || isSubmitting"
+        (click)="updateGameName()"
+        *ngIf="newGameName.length > 0">
+        <i class="fa fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+        <i class="fa fa-check" *ngIf="!isSubmitting"></i>
+        {{ isSubmitting ? 'Updating...' : 'Use "' + newGameName + '"' }}
+      </button>
+    </div>
+  </div>
+</div>

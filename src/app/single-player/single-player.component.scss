@@ -77,7 +77,8 @@
   margin-bottom: 20px;
 }
 
-.continent-selection {
+.continent-selection,
+.rounds-selection {
   margin-bottom: 30px;
 
   h3 {
@@ -100,7 +101,15 @@
   margin-bottom: 20px;
 }
 
-.continent-btn {
+.rounds-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.continent-btn,
+.rounds-btn {
   background: #f8f9fa;
   border: 2px solid #e9ecef;
   border-radius: 12px;
@@ -136,9 +145,20 @@
     font-size: 2rem;
   }
 
-  .continent-name {
+  .continent-name,
+  .rounds-label {
     font-weight: 600;
     font-size: 1rem;
+  }
+
+  .rounds-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #667eea;
+  }
+
+  &.selected .rounds-number {
+    color: white;
   }
 }
 
@@ -352,7 +372,13 @@
     gap: 10px;
   }
 
-  .continent-btn {
+  .rounds-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .continent-btn,
+  .rounds-btn {
     padding: 15px;
   }
 

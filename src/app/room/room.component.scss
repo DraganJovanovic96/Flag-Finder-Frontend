@@ -564,6 +564,162 @@
   font-size: 14px;
 }
 
+.invitation-section {
+  margin: 30px auto;
+  padding: 25px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  width: 732px;
+  max-width: 100%;
+
+  h3 {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  p {
+    margin: 0 0 20px 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+  }
+
+  @media (max-width: 768px) {
+    margin: 20px 0;
+    padding: 20px;
+  }
+}
+
+.game-settings-section {
+  margin: 30px auto;
+  padding: 25px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  width: 732px;
+  max-width: 100%;
+
+  h3 {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    i {
+      color: #4CAF50;
+      font-size: 18px;
+    }
+  }
+
+  .setting-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    label {
+      color: #ffffff;
+      font-weight: 500;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .rounds-dropdown {
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #ffffff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      max-width: 200px;
+
+      &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+      }
+
+      &:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #4CAF50;
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      option {
+        background: #2c3e50;
+        color: #ffffff;
+        padding: 10px;
+      }
+    }
+
+    .setting-note {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+      font-style: italic;
+      margin-top: 4px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    margin: 20px 0;
+    padding: 20px;
+
+    .setting-item .rounds-dropdown {
+      max-width: 100%;
+    }
+  }
+}
+
+.rounds-selection-container {
+  margin-bottom: 20px;
+  text-align: left;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .rounds-dropdown {
+    width: 200px;
+    padding: 8px 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    &:hover {
+      border-color: #667eea;
+    }
+  }
+}
+
 .invitation-form {
   display: flex;
   flex-direction: column;
