@@ -223,7 +223,34 @@
 
   <!-- Game Interface -->
   <div *ngIf="game && (game.currentRoundData || game.currentSinglePlayerRoundData) && !showStartCountdown && !isLoading && game.status !== 'COMPLETED'" class="game-interface">
-    <!-- Game Header -->
+    
+    <!-- Mobile Scores Overlay (only visible on mobile) -->
+    <div class="mobile-scores-overlay">
+      <!-- Single Player Mode -->
+      <div *ngIf="game.playerName" class="mobile-score">
+        <span class="name">{{ getSinglePlayerGameName() }}</span>
+        <span class="points">{{ game.hostScore }}</span>
+      </div>
+      
+      <!-- Multiplayer Mode -->
+      <ng-container *ngIf="!game.playerName">
+        <div class="mobile-score">
+          <span class="name">{{ game.hostName }}</span>
+          <span class="points">{{ game.hostScore }}</span>
+        </div>
+        <div class="mobile-vs">VS</div>
+        <div class="mobile-score">
+          <span class="name">{{ game.guestName }}</span>
+          <span class="points">{{ game.guestScore }}</span>
+        </div>
+      </ng-container>
+      
+      <div class="mobile-round">
+        {{ game.currentRound }}/{{ game.totalRounds }}
+      </div>
+    </div>
+
+    <!-- Game Header (hidden on mobile) -->
     <div class="game-header" *ngIf="game.status !== 'COMPLETED'">
       <div class="players-info">
         <!-- Single Player Mode -->
@@ -259,7 +286,7 @@
       </div>
     </div>
 
-    <!-- Round Timer (hidden when game is completed) -->
+    <!-- Round Timer (hidden on mobile) -->
     <div class="round-timer-container" *ngIf="game.status !== 'COMPLETED'">
       <div class="round-timer" [class.timer-warning]="roundTimeRemaining <= 5">
         <div class="timer-circle">
@@ -270,7 +297,7 @@
 
     <!-- Flag Display -->
     <div class="flag-container" *ngIf="(game.currentRoundData || game.currentSinglePlayerRoundData) && game.status === 'IN_PROGRESS'">
-      <div class="flag-wrapper">
+      <div class="flag-wrapper" [attr.data-timer]="roundTimeRemaining">
         <img 
           [src]="getFlagImageSrc()" 
           alt="Country Flag" 

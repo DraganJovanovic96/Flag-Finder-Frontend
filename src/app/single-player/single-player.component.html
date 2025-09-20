@@ -4,13 +4,12 @@
       <button class="back-btn" (click)="goBack()" title="Go back">
         <i class="fa fa-arrow-left"></i>
       </button>
-      <h1 class="clickable-title" (click)="goBack()">🎯 Solo Practice</h1>
+      <h1 class="clickable-title" (click)="goBack()">Solo Practice</h1>
       <div class="header-spacer"></div>
     </div>
     <p>Practice your flag knowledge at your own pace</p>
   </header>
 
-  <!-- Step 1: Room Creation -->
   <div *ngIf="!singlePlayerRoom" class="setup-section">
     <div class="continent-selection">
       <h3>Choose Your Challenge</h3>
@@ -62,7 +61,6 @@
     </div>
   </div>
 
-  <!-- Step 2: Room Created - Start Game -->
   <div *ngIf="singlePlayerRoom" class="room-ready-section">
     <div class="room-info">
       <div class="success-icon">
@@ -99,7 +97,6 @@
     </div>
   </div>
 
-  <!-- Error Message -->
   <div *ngIf="errorMessage" class="error-message">
     <i class="fa fa-exclamation-triangle"></i>
     <span>{{ errorMessage }}</span>

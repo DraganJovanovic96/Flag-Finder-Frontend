@@ -4,7 +4,7 @@
       <button class="back-btn" (click)="goBack()" title="Go back">
         <i class="fa fa-arrow-left"></i>
       </button>
-      <h1 class="clickable-title" (click)="goBack()">🏆 Game History</h1>
+      <h1 class="clickable-title" (click)="goBack()">Game History</h1>
       <div class="header-spacer"></div>
     </div>
     <p>Your FlagFinder journey and achievements</p>
@@ -71,7 +71,6 @@
         </button>
       </div>
 
-      <!-- Card View -->
       <div *ngIf="!showTableView" class="card-view">
         <div class="game-card" *ngFor="let game of gameHistory; let i = index">
           <div class="game-header">
@@ -89,7 +88,7 @@
             </div>
             <div class="game-result" [class]="getGameResultClass(game)">
               <div class="result-text">{{ getGameResult(game) }}</div>
-              <div class="score">{{ getUserScore(game) }} - {{ getOpponentScore(game) }}</div>
+              <div class="score">{{ getOpponentScore(game) }} - {{ getUserScore(game) }}</div>
             </div>
           </div>
 
@@ -154,7 +153,6 @@
         </div>
       </div>
 
-      <!-- Table View -->
       <div *ngIf="showTableView" class="table-view">
         <div class="game-table" *ngFor="let game of gameHistory; let i = index">
           <div class="game-table-header">
@@ -243,7 +241,6 @@
         </div>
       </div>
 
-      <!-- Pagination Controls at Bottom -->
       <div class="pagination-container" *ngIf="totalPages > 1">
         <div class="pagination-info">
           <span>Page {{ currentPage + 1 }} of {{ totalPages }} ({{ totalElements }} total games)</span>

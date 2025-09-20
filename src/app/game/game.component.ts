@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, Renderer2, NgZone, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -86,7 +86,8 @@ export class GameComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private wsService: WebSocketService,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit(): void {
@@ -96,6 +97,8 @@ export class GameComponent implements OnInit, OnDestroy {
     }
 
     this.wsService.connect();
+    
+
     
     this.subscriptions.push(
       this.wsService.roundStarted$.subscribe({
@@ -108,6 +111,7 @@ export class GameComponent implements OnInit, OnDestroy {
               this.userGuess = '';
               this.guessMessage = '';
               this.cdr.detectChanges();
+              this.scrollToGameContent();
               this.focusGuessInput();
             }
           });
@@ -526,7 +530,9 @@ export class GameComponent implements OnInit, OnDestroy {
 
   selectSuggestion(country: any): void {
     this.userGuess = country.englishName;
-    this.hideSuggestions();
+    this.showSuggestions = false;
+    this.countrySuggestions = [];
+    this.selectedSuggestionIndex = -1;
   }
 
   hideSuggestions(): void {
@@ -652,6 +658,28 @@ export class GameComponent implements OnInit, OnDestroy {
       if (this.guessInput && this.guessInput.nativeElement) {
         this.guessInput.nativeElement.focus();
       }
-    }, 100);
+    }, 700);
+  }
+
+  private scrollToGameContent(): void {
+    setTimeout(() => {
+      if (window.innerWidth <= 768) {
+        const mobileScores = document.querySelector('.mobile-scores-overlay');
+        if (mobileScores) {
+          mobileScores.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+        }
+      } else {
+        const gameHeader = document.querySelector('.game-header');
+        if (gameHeader) {
+          gameHeader.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+        }
+      }
+    }, 300);
   }
 }
