@@ -7,6 +7,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { SinglePlayerComponent } from './single-player/single-player.component';
 import { OAuth2CallbackComponent } from './oauth2-callback/oauth2-callback.component';
 import { SetupGameNameComponent } from './setup-gamename/setup-gamename.component';
+import { GameGuard } from './guards/game.guard';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -14,9 +15,9 @@ export const routes: Routes = [
   { path: 'setup-gamename', component: SetupGameNameComponent },
   { path: 'home', component: CreateRoomComponent },
   { path: 'room/:id', component: RoomComponent },
-  { path: 'game/:roomId', component: GameComponent },
+  { path: 'game/:roomId', component: GameComponent, canDeactivate: [GameGuard] },
   { path: 'single-player', component: SinglePlayerComponent },
-  { path: 'single-player-game/:roomId', component: GameComponent },
+  { path: 'single-player-game/:roomId', component: GameComponent, canDeactivate: [GameGuard] },
   { path: 'profile', component: ProfileComponent },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', redirectTo: '/home' }

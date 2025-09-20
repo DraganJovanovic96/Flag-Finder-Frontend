@@ -180,7 +180,6 @@
     </div>
   </div>
 
-  <!-- Invitation Section (only when no guest) -->
   <div class="invitation-section" *ngIf="isCurrentUserHost() && !room?.guestUserName">
     <h3>Invite a Friend</h3>
     <p>Invite a friend to join your game by entering their game name</p>
@@ -230,7 +229,6 @@
     </div>
   </div>
 
-  <!-- Game Settings Section (always visible) -->
   <div class="game-settings-section">
     <h3>
       <i class="fa fa-cog"></i>

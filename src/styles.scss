@@ -19,6 +19,13 @@ body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   background-attachment: fixed;
   min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@supports (height: 100dvh) {
+  body {
+    min-height: 100dvh;
+  }
 }
 
 h1, h2, h3, h4, h5, h6, p, ul, ol, li, button, input, textarea, select {
@@ -29,7 +36,28 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, li, button, input, textarea, select {
 app-root {
   display: block;
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea,
+  select {
+    font-size: 16px !important;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 8px;
+  }
+  
+  input:focus,
+  textarea:focus,
+  select:focus {
+    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
+  }
 }
 
 button {
